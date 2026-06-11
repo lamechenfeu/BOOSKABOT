@@ -163,3 +163,13 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 bot.launch();
 
 console.log("Bot prêt 🚀");
+const http = require("http");
+
+const PORT = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("BOOSKABOT est en ligne 🚀");
+}).listen(PORT, () => {
+  console.log(`Serveur HTTP lancé sur le port ${PORT}`);
+});
