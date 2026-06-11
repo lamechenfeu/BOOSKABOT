@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const { Telegraf } = require('telegraf');
 const db = require('./database');
+const http = require("http");
 
 const BOT_URL = "https://booskabot.vercel.app";
 
@@ -39,15 +40,12 @@ Cliquez sur les boutons du dessous pour naviguer !`,
       reply_markup: {
         inline_keyboard: [
           [{ text: "🗳️ VOTES", callback_data: "votes" }],
-
-          // 📱 MINI APP DIRECT
           [{
             text: "📱 MINI APP",
             web_app: {
               url: BOT_URL
             }
           }],
-
           [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
         ]
       }
@@ -157,13 +155,8 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 });
 
 //////////////////////////////
-// 🚀 LAUNCH
+// 🌍 SERVEUR HTTP POUR RENDER
 //////////////////////////////
-
-bot.launch();
-
-console.log("Bot prêt 🚀");
-const http = require("http");
 
 const PORT = process.env.PORT || 3000;
 
@@ -173,3 +166,11 @@ http.createServer((req, res) => {
 }).listen(PORT, () => {
   console.log(`Serveur HTTP lancé sur le port ${PORT}`);
 });
+
+//////////////////////////////
+// 🚀 LAUNCH
+//////////////////////////////
+
+bot.launch();
+
+console.log("Bot prêt 🚀");
