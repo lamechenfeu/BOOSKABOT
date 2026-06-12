@@ -171,6 +171,17 @@ http.createServer((req, res) => {
 // 🚀 LAUNCH
 //////////////////////////////
 
-bot.launch();
+bot.launch()
+  .then(() => {
+    console.log("Bot prêt 🚀");
+  })
+  .catch((err) => {
+    console.error("Erreur lancement bot :", err.message);
 
-console.log("Bot prêt 🚀");
+    if (err.message && err.message.includes("409")) {
+      console.log("Conflit Telegram 409 détecté : une autre instance tourne encore.");
+      console.log("Le serveur HTTP reste actif, Render ne crash pas.");
+    } else {
+      throw err;
+    }
+  });
