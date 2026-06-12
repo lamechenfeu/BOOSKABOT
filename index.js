@@ -158,7 +158,7 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 // 🛠️ ADMIN
 //////////////////////////////
 
-const ADMIN_IDS = ["TON_ID_TELEGRAM_ICI"];
+const ADMIN_IDS = ["6832036781"];
 
 function isAdmin(ctx) {
   return ADMIN_IDS.includes(String(ctx.from.id));
