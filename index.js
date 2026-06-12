@@ -155,6 +155,114 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 });
 
 //////////////////////////////
+// 🛠️ ADMIN
+//////////////////////////////
+
+const ADMIN_IDS = ["TON_ID_TELEGRAM_ICI"];
+
+function isAdmin(ctx) {
+  return ADMIN_IDS.includes(String(ctx.from.id));
+}
+
+bot.command("admin", async (ctx) => {
+  if (!isAdmin(ctx)) {
+    return ctx.reply(`❌ Accès refusé.\nTon ID Telegram : ${ctx.from.id}`);
+  }
+
+  await ctx.reply("🛠️ Panel Admin BOOSKABOT", {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "➕ Ajouter un plug", callback_data: "admin_add_plug" }],
+        [{ text: "📋 Liste des plugs", callback_data: "admin_list_plugs" }],
+        [{ text: "🗑️ Supprimer un plug", callback_data: "admin_delete_plug" }]
+      ]
+    }
+  });
+});
+
+bot.action("admin_list_plugs", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+
+  const plugs = db.getPlugs();
+
+  if (!plugs.length) {
+    await ctx.answerCbQuery();
+    return ctx.reply("📋 Aucun plug enregistré pour le moment.");
+  }
+
+  const list = plugs.map((p, i) => {
+    return `${i + 1}. ${p.name}
+📍 ${p.city}
+🔗 ${p.link || "Aucun lien"}
+🖼️ ${p.image || "Aucune image"}
+🆔 ${p.id}`;
+  }).join("\n\n");
+
+  await ctx.answerCbQuery();
+  await ctx.reply(`📋 Liste des plugs :\n\n${list}`);
+});
+
+bot.action("admin_add_plug", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+
+  await ctx.answerCbQuery();
+  await ctx.reply(
+`➕ Pour ajouter un plug, envoie un message comme ça :
+
+/addplug Nom du plug | Ville | Lien | ImageURL
+
+Exemple :
+/addplug Farmz 87/47 | Paris | https://exemple.com | https://image.com/photo.jpg`
+  );
+});
+
+bot.command("addplug", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.reply("❌ Accès refusé");
+
+  const text = ctx.message.text.replace("/addplug", "").trim();
+  const parts = text.split("|").map(p => p.trim());
+
+  if (parts.length < 2) {
+    return ctx.reply("❌ Format incorrect.\n\nExemple :\n/addplug Nom | Ville | Lien | ImageURL");
+  }
+
+  const plug = db.addPlug({
+    name: parts[0],
+    city: parts[1],
+    link: parts[2] || "",
+    image: parts[3] || ""
+  });
+
+  await ctx.reply(`✅ Plug ajouté : ${plug.name}\n🆔 ID : ${plug.id}`);
+});
+
+bot.action("admin_delete_plug", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+
+  await ctx.answerCbQuery();
+  await ctx.reply(
+`🗑️ Pour supprimer un plug :
+
+/delplug ID
+
+Exemple :
+/delplug 1718200000000`
+  );
+});
+
+bot.command("delplug", async (ctx) => {
+  if (!isAdmin(ctx)) return ctx.reply("❌ Accès refusé");
+
+  const id = ctx.message.text.replace("/delplug", "").trim();
+
+  if (!id) return ctx.reply("❌ Mets l'ID du plug.");
+
+  db.deletePlug(id);
+
+  await ctx.reply(`🗑️ Plug supprimé : ${id}`);
+});
+
+//////////////////////////////
 // 🌍 SERVEUR HTTP POUR RENDER
 //////////////////////////////
 
