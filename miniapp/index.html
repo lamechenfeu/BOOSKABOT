@@ -96,15 +96,15 @@
     .content { padding: 14px 16px 0; }
 
     .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      display: flex;
+      justify-content: center;
       margin-bottom: 16px;
     }
 
     .stat {
-      padding: 12px 8px;
-      border-radius: 18px;
+      width: 160px;
+      padding: 14px 10px;
+      border-radius: 20px;
       background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
       border: 1px solid rgba(255,255,255,.09);
       text-align: center;
@@ -112,14 +112,14 @@
 
     .stat strong {
       display: block;
-      font-size: 18px;
+      font-size: 24px;
       color: #5de4ff;
     }
 
     .stat span {
-      font-size: 10px;
+      font-size: 11px;
       color: #8da3b6;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .top-row {
@@ -232,9 +232,9 @@
       position: relative;
     }
 
-    .rank, .rating {
+    .rank, .vote-pill {
       position: absolute;
-      background: rgba(0,0,0,.68);
+      background: rgba(0,0,0,.72);
       padding: 5px 9px;
       border-radius: 999px;
       font-size: 12px;
@@ -242,7 +242,7 @@
     }
 
     .rank { top: 8px; left: 8px; }
-    .rating { right: 8px; bottom: 8px; }
+    .vote-pill { right: 8px; bottom: 8px; }
 
     .plug-info {
       padding: 12px 12px 12px 0;
@@ -306,6 +306,8 @@
       border-radius: 999px;
       background: linear-gradient(90deg, #008cff, #00d9ff);
       box-shadow: 0 8px 20px rgba(0,217,255,.22);
+      border: none;
+      width: 100%;
     }
 
     .empty {
@@ -315,6 +317,109 @@
       border: 1px solid rgba(255,255,255,.1);
       color: #9badc2;
       text-align: center;
+    }
+
+    .profile {
+      display: none;
+      min-height: 100vh;
+      padding-bottom: 96px;
+      animation: fade .35s ease;
+    }
+
+    .profile-hero {
+      height: 330px;
+      position: relative;
+      background: #111827;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .profile-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,.05), #05070d 92%);
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 18px;
+      left: 16px;
+      z-index: 3;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.5);
+      color: white;
+      font-size: 20px;
+    }
+
+    .profile-content {
+      padding: 0 16px 20px;
+      margin-top: -70px;
+      position: relative;
+      z-index: 4;
+    }
+
+    .profile-card {
+      border-radius: 26px;
+      padding: 18px;
+      background: rgba(13,20,32,.9);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    }
+
+    .profile-title {
+      font-size: 26px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .profile-meta {
+      color: #9fc7dd;
+      font-size: 13px;
+      margin-bottom: 14px;
+      font-weight: 800;
+    }
+
+    .profile-desc {
+      color: #c5d1dd;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+    }
+
+    .link-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .link-btn {
+      display: block;
+      text-decoration: none;
+      color: white;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.1);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .networks {
+      display: none;
+      padding: 20px 16px 100px;
+      min-height: 100vh;
+      animation: fade .35s ease;
+    }
+
+    .networks h2 {
+      margin-top: 20px;
+      font-size: 26px;
     }
 
     .bottom-nav {
@@ -327,7 +432,7 @@
       background: rgba(13,20,32,.92);
       border: 1px solid rgba(255,255,255,.12);
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       align-items: center;
       backdrop-filter: blur(14px);
       box-shadow: 0 12px 40px rgba(0,0,0,.55);
@@ -339,6 +444,8 @@
       text-align: center;
       font-size: 23px;
       text-decoration: none;
+      border: none;
+      background: transparent;
     }
 
     .nav.active {
@@ -360,7 +467,7 @@
     <section class="hero">
       <div class="hero-glass">
         <div class="hero-title">BOOSKABOT<br>Plug Battle</div>
-        <div class="hero-sub">classement • votes • réseaux officiels</div>
+        <div class="hero-sub">classement • réseaux officiels</div>
       </div>
     </section>
 
@@ -368,20 +475,16 @@
 
       <div class="stats">
         <div class="stat"><strong id="plugCount">0</strong><span>PLUGS</span></div>
-        <div class="stat"><strong id="voteCount">0</strong><span>VOTES</span></div>
-        <div class="stat"><strong>LIVE</strong><span>STATUS</span></div>
       </div>
 
       <div class="top-row">
-        <div class="title">Plugs Certifiés <span id="resultCount">0 résultat</span></div>
-        <div class="circle">⚙️</div>
-        <div class="circle">☰</div>
+        <div class="title">Classement <span id="resultCount">0 résultat</span></div>
         <div class="circle">🏆</div>
       </div>
 
       <div class="search">
         🔎
-        <input id="searchInput" placeholder="Rechercher par nom ou ville..." />
+        <input id="searchInput" placeholder="Rechercher par nom, ville ou secteur..." />
       </div>
 
       <div class="podium" id="podium"></div>
@@ -389,16 +492,22 @@
       <div id="plugList"></div>
 
     </section>
-
-    <nav class="bottom-nav">
-      <a class="nav active" href="#">🏠</a>
-      <a class="nav" href="#">🏆</a>
-      <a class="nav" href="https://instagram.com/booskaplugofficiel">📸</a>
-      <a class="nav" href="https://callup.luffa.im/c/Rh8K8YR2TNu">🟣</a>
-      <a class="nav" href="https://tato.im/booskaplug1">🥔</a>
-    </nav>
-
   </main>
+
+  <section class="profile" id="profile"></section>
+
+  <section class="networks" id="networks">
+    <h2>🌍 Nos réseaux</h2>
+
+    <a class="link-btn" href="https://instagram.com/booskaplugofficiel">📸 Instagram</a>
+    <a class="link-btn" href="https://callup.luffa.im/c/Rh8K8YR2TNu">🟣 Luffa</a>
+    <a class="link-btn" href="https://tato.im/booskaplug1">🥔 Potato</a>
+  </section>
+
+  <nav class="bottom-nav">
+    <button class="nav active" id="navRanking">🏆 Classement</button>
+    <button class="nav" id="navNetworks">🌍 Réseaux</button>
+  </nav>
 
   <script>
     const tg = window.Telegram.WebApp;
@@ -419,6 +528,15 @@
       await loadPlugs();
     };
 
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
     async function loadPlugs() {
       try {
         const res = await fetch(API_URL);
@@ -430,6 +548,24 @@
         document.getElementById("plugList").innerHTML =
           `<div class="empty">Impossible de charger les plugs pour le moment.</div>`;
       }
+    }
+
+    function showRanking() {
+      document.getElementById("app").style.display = "block";
+      document.getElementById("profile").style.display = "none";
+      document.getElementById("networks").style.display = "none";
+
+      document.getElementById("navRanking").classList.add("active");
+      document.getElementById("navNetworks").classList.remove("active");
+    }
+
+    function showNetworks() {
+      document.getElementById("app").style.display = "none";
+      document.getElementById("profile").style.display = "none";
+      document.getElementById("networks").style.display = "block";
+
+      document.getElementById("navRanking").classList.remove("active");
+      document.getElementById("navNetworks").classList.add("active");
     }
 
     function renderPodium(plugs) {
@@ -448,17 +584,17 @@
       podium.innerHTML = `
         <div class="podium-card">
           <div class="podium-rank">🥈</div>
-          <div class="podium-name">${second ? second.name : "-"}</div>
+          <div class="podium-name">${second ? escapeHtml(second.name) : "-"}</div>
           <div class="podium-votes">${second ? second.votes || 0 : 0} vote</div>
         </div>
         <div class="podium-card first">
           <div class="podium-rank">🥇</div>
-          <div class="podium-name">${first ? first.name : "-"}</div>
+          <div class="podium-name">${first ? escapeHtml(first.name) : "-"}</div>
           <div class="podium-votes">${first ? first.votes || 0 : 0} vote</div>
         </div>
         <div class="podium-card">
           <div class="podium-rank">🥉</div>
-          <div class="podium-name">${third ? third.name : "-"}</div>
+          <div class="podium-name">${third ? escapeHtml(third.name) : "-"}</div>
           <div class="podium-votes">${third ? third.votes || 0 : 0} vote</div>
         </div>
       `;
@@ -478,50 +614,89 @@
 
       list.innerHTML = plugs.map((plug, index) => {
         const imageStyle = plug.image
-          ? `style="background: url('${plug.image}') center/cover no-repeat;"`
+          ? `style="background: url('${escapeHtml(plug.image)}') center/cover no-repeat;"`
           : "";
 
         const emoji = plug.image ? "" : "🔥";
 
         return `
-          <article class="plug-card" data-name="${plug.name} ${plug.city}">
+          <article class="plug-card" data-id="${plug.id}" data-name="${escapeHtml(`${plug.name} ${plug.city} ${plug.sector}`)}">
             <div class="plug-img" ${imageStyle}>
               <div class="rank">#${index + 1}</div>
               ${emoji}
-              <div class="rating">⭐ 5.0</div>
+              <div class="vote-pill">🗳️ ${plug.votes || 0}</div>
             </div>
 
             <div class="plug-info">
-              <div class="plug-name">${plug.name}</div>
+              <div class="plug-name">${escapeHtml(plug.name)}</div>
 
               <div class="badges">
-                <span class="tag green">MEET-UP</span>
-                <span class="tag orange">LIVRAISON</span>
-                <span class="tag blue">${plug.city || "FRANCE 🇫🇷"}</span>
+                <span class="tag green">${escapeHtml(plug.sector || "SECTEUR")}</span>
+                <span class="tag blue">${escapeHtml(plug.city || "FRANCE")}</span>
               </div>
 
-              <div class="desc">Plug ajouté depuis le panel admin BOOSKABOT.</div>
+              <div class="desc">${escapeHtml(plug.description || "Aucune description pour le moment.")}</div>
 
               <div class="progress">
-                <span style="width: 100%"></span>
+                <span style="width: ${Math.min(100, (plug.votes || 0) * 10 || 8)}%"></span>
               </div>
 
-              <a class="btn" href="${plug.link || "#"}">VOIR LES INFOS →</a>
+              <button class="btn" onclick="openProfile('${plug.id}')">VOIR LES INFOS →</button>
             </div>
           </article>
         `;
       }).join("");
     }
 
+    function openProfile(id) {
+      const plug = allPlugs.find(p => String(p.id) === String(id));
+      if (!plug) return;
+
+      document.getElementById("app").style.display = "none";
+      document.getElementById("networks").style.display = "none";
+
+      const profile = document.getElementById("profile");
+      profile.style.display = "block";
+
+      const links = [];
+
+      if (plug.telegram || plug.link) links.push(`<a class="link-btn" href="${escapeHtml(plug.telegram || plug.link)}">🔗 Canal Telegram</a>`);
+      if (plug.instagram) links.push(`<a class="link-btn" href="${escapeHtml(plug.instagram)}">📸 Instagram</a>`);
+      if (plug.potato) links.push(`<a class="link-btn" href="${escapeHtml(plug.potato)}">🥔 Potato</a>`);
+      if (plug.luffa) links.push(`<a class="link-btn" href="${escapeHtml(plug.luffa)}">🟣 Luffa</a>`);
+
+      profile.innerHTML = `
+        <div class="profile-hero" style="${plug.image ? `background-image: url('${escapeHtml(plug.image)}')` : ""}">
+          <button class="back-btn" onclick="showRanking()">‹</button>
+        </div>
+
+        <div class="profile-content">
+          <div class="profile-card">
+            <div class="profile-title">${escapeHtml(plug.name)}</div>
+            <div class="profile-meta">📍 ${escapeHtml(plug.city || "France")} • 📌 ${escapeHtml(plug.sector || "Secteur non renseigné")} • 🗳️ ${plug.votes || 0} vote</div>
+            <div class="profile-desc">${escapeHtml(plug.description || "Aucune description pour le moment.")}</div>
+
+            <div class="link-grid">
+              ${links.length ? links.join("") : `<div class="empty">Aucun lien renseigné.</div>`}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     document.getElementById("searchInput").addEventListener("input", () => {
       const value = document.getElementById("searchInput").value.toLowerCase();
 
       const filtered = allPlugs.filter(plug => {
-        return `${plug.name} ${plug.city}`.toLowerCase().includes(value);
+        return `${plug.name} ${plug.city} ${plug.sector}`.toLowerCase().includes(value);
       });
 
       renderPlugs(filtered);
+      renderPodium(filtered);
     });
+
+    document.getElementById("navRanking").addEventListener("click", showRanking);
+    document.getElementById("navNetworks").addEventListener("click", showNetworks);
   </script>
 
 </body>
