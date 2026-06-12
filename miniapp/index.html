@@ -1,8 +1,10 @@
+Oui. Remplace tout ton miniapp/index.html par cette version modifiée :
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>BOOSKABOT</title>
+  <title>BSP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -16,6 +18,27 @@
       color: white;
       padding-bottom: 96px;
       overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url("bsp.png") center/cover no-repeat;
+      filter: blur(22px);
+      opacity: 0.22;
+      transform: scale(1.18);
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top, rgba(190,0,255,.35), transparent 35%),
+        linear-gradient(to bottom, rgba(5,7,13,.72), #05070d);
+      z-index: -1;
     }
 
     .loading {
@@ -43,16 +66,24 @@
       50% { transform: scale(1.06); opacity: .86; }
     }
 
-    .app { display: none; animation: fade .45s ease; }
-    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .app {
+      display: none;
+      animation: pageDrop .9s ease both;
+    }
+
+    @keyframes pageDrop {
+      from { opacity: 0; transform: translateY(-55px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .hero {
-      height: 260px;
+      height: 330px;
       position: relative;
       background:
         linear-gradient(to bottom, rgba(5,7,13,.05), #05070d 96%),
         url("bsp.png") center/cover no-repeat;
       overflow: hidden;
+      animation: pageDrop .9s ease both;
     }
 
     .hero::after {
@@ -60,59 +91,97 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 52%, rgba(189,0,255,.12), transparent 30%),
-        linear-gradient(to bottom, transparent, #05070d);
+        radial-gradient(circle at 50% 52%, rgba(189,0,255,.25), transparent 32%),
+        linear-gradient(to bottom, rgba(0,0,0,.15), #05070d);
+      backdrop-filter: blur(2px);
     }
 
     .hero-glass {
       position: absolute;
       left: 16px;
       right: 16px;
-      bottom: 12px;
-      padding: 14px;
-      border-radius: 22px;
-      background: rgba(8, 13, 24, .72);
-      border: 1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(14px);
+      bottom: 18px;
+      padding: 22px 16px;
+      border-radius: 26px;
+      background: rgba(8, 13, 24, .76);
+      border: 1px solid rgba(190,0,255,.38);
+      backdrop-filter: blur(16px);
       z-index: 2;
-      box-shadow: 0 20px 55px rgba(0,0,0,.45);
+      box-shadow:
+        0 0 28px rgba(190,0,255,.3),
+        0 20px 55px rgba(0,0,0,.45);
+      text-align: center;
     }
 
     .hero-title {
-      font-size: 25px;
+      font-size: 58px;
       font-weight: 900;
-      line-height: 1.05;
-      margin-bottom: 6px;
+      line-height: .95;
+      margin-bottom: 12px;
+      color: transparent;
+      background: linear-gradient(90deg, #8b00ff, #ff4dff, #ffffff, #b400ff, #8b00ff);
+      background-size: 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow:
+        0 0 12px rgba(180,0,255,.95),
+        0 0 32px rgba(180,0,255,.75),
+        0 0 60px rgba(180,0,255,.5);
+      animation: neonTextMove 2.5s linear infinite, textSlideIn .9s ease both;
     }
 
     .hero-sub {
-      color: #9fc7dd;
-      font-size: 12px;
-      font-weight: 800;
+      color: #ff78ff;
+      font-size: 13px;
+      font-weight: 900;
       letter-spacing: .8px;
       text-transform: uppercase;
+      text-shadow:
+        0 0 10px rgba(255,80,255,.9),
+        0 0 24px rgba(180,0,255,.7);
+      animation: neonTextMove 2.8s linear infinite, textSlideIn 1.1s ease both;
     }
 
-    .content { padding: 14px 16px 0; }
+    @keyframes neonTextMove {
+      from { background-position: 0%; }
+      to { background-position: 300%; }
+    }
+
+    @keyframes textSlideIn {
+      from { opacity: 0; transform: translateX(-55px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .content {
+      padding: 14px 16px 0;
+      animation: contentDrop 1s ease both;
+      animation-delay: .15s;
+    }
+
+    @keyframes contentDrop {
+      from { opacity: 0; transform: translateY(-35px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .stats {
       display: flex;
       justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .stat {
-      width: 160px;
-      padding: 14px 10px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-      border: 1px solid rgba(255,255,255,.09);
+      width: 170px;
+      padding: 16px 10px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(255,255,255,.1), rgba(255,255,255,.04));
+      border: 1px solid rgba(190,0,255,.32);
       text-align: center;
+      box-shadow: 0 0 24px rgba(190,0,255,.18);
     }
 
     .stat strong {
       display: block;
-      font-size: 24px;
+      font-size: 28px;
       color: #5de4ff;
     }
 
@@ -141,28 +210,30 @@
     }
 
     .circle {
-      width: 42px;
-      height: 42px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(190,0,255,.3);
       display: flex;
       justify-content: center;
       align-items: center;
       color: #b8d9ff;
+      box-shadow: 0 0 18px rgba(190,0,255,.18);
     }
 
     .search {
       display: flex;
       align-items: center;
       gap: 10px;
-      height: 48px;
+      height: 50px;
       padding: 0 14px;
-      border-radius: 17px;
-      background: #101827;
-      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      background: rgba(16,24,39,.86);
+      border: 1px solid rgba(190,0,255,.24);
       margin-bottom: 16px;
       color: #7f93aa;
+      box-shadow: 0 0 22px rgba(190,0,255,.12);
     }
 
     .search input {
@@ -205,17 +276,19 @@
       grid-template-columns: 38% 1fr;
       gap: 12px;
       min-height: 160px;
-      background: linear-gradient(145deg, #111827, #070b12);
-      border: 1px solid rgba(255,255,255,.1);
+      background: linear-gradient(145deg, rgba(17,24,39,.95), rgba(7,11,18,.95));
+      border: 1px solid rgba(190,0,255,.22);
       border-radius: 22px;
       margin-bottom: 14px;
       overflow: hidden;
-      box-shadow: 0 15px 35px rgba(0,0,0,.35);
-      animation: cardIn .35s ease;
+      box-shadow:
+        0 0 22px rgba(190,0,255,.12),
+        0 15px 35px rgba(0,0,0,.35);
+      animation: cardIn .45s ease;
     }
 
     @keyframes cardIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -270,7 +343,6 @@
     }
 
     .green { background: rgba(0,255,170,.12); color: #28ffb4; }
-    .orange { background: rgba(255,155,55,.13); color: #ffb05c; }
     .blue { background: rgba(0,210,255,.13); color: #5de4ff; }
 
     .desc {
@@ -298,7 +370,6 @@
     .btn {
       display: block;
       text-align: center;
-      text-decoration: none;
       color: #e9fbff;
       font-size: 12px;
       font-weight: 900;
@@ -319,11 +390,11 @@
       text-align: center;
     }
 
-    .profile {
+    .profile, .networks {
       display: none;
       min-height: 100vh;
       padding-bottom: 96px;
-      animation: fade .35s ease;
+      animation: pageDrop .7s ease both;
     }
 
     .profile-hero {
@@ -366,7 +437,7 @@
       border-radius: 26px;
       padding: 18px;
       background: rgba(13,20,32,.9);
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(190,0,255,.28);
       backdrop-filter: blur(14px);
       box-shadow: 0 20px 60px rgba(0,0,0,.45);
     }
@@ -405,16 +476,13 @@
       padding: 14px;
       border-radius: 16px;
       background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.1);
+      border: 1px solid rgba(190,0,255,.22);
       font-weight: 900;
       text-align: center;
     }
 
     .networks {
-      display: none;
       padding: 20px 16px 100px;
-      min-height: 100vh;
-      animation: fade .35s ease;
     }
 
     .networks h2 {
@@ -427,22 +495,24 @@
       left: 16px;
       right: 16px;
       bottom: 16px;
-      height: 64px;
-      border-radius: 25px;
+      height: 66px;
+      border-radius: 28px;
       background: rgba(13,20,32,.92);
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(190,0,255,.38);
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       align-items: center;
       backdrop-filter: blur(14px);
-      box-shadow: 0 12px 40px rgba(0,0,0,.55);
+      box-shadow:
+        0 0 24px rgba(190,0,255,.35),
+        0 12px 40px rgba(0,0,0,.55);
       z-index: 50;
     }
 
     .nav {
       color: #8ca6bd;
       text-align: center;
-      font-size: 23px;
+      font-size: 31px;
       text-decoration: none;
       border: none;
       background: transparent;
@@ -459,15 +529,15 @@
 
   <div class="loading" id="loading">
     <div class="loader-logo"></div>
-    <p>Chargement de BOOSKABOT...</p>
+    <p>Chargement de BSP...</p>
   </div>
 
   <main class="app" id="app">
 
     <section class="hero">
       <div class="hero-glass">
-        <div class="hero-title">BOOSKABOT<br>Plug Battle</div>
-        <div class="hero-sub">classement • réseaux officiels</div>
+        <div class="hero-title">BSP 🔌</div>
+        <div class="hero-sub">La référence numéro 1 pour trouver ta connexion 🎖️</div>
       </div>
     </section>
 
@@ -505,8 +575,8 @@
   </section>
 
   <nav class="bottom-nav">
-    <button class="nav active" id="navRanking">🏆 Classement</button>
-    <button class="nav" id="navNetworks">🌍 Réseaux</button>
+    <button class="nav active" id="navRanking">🏆</button>
+    <button class="nav" id="navNetworks">🌍</button>
   </nav>
 
   <script>
