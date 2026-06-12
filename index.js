@@ -196,7 +196,13 @@ bot.command("admin", async (ctx) => {
   await ctx.reply("🛠️ Panel Admin BOOSKABOT", {
     reply_markup: adminPanelKeyboard()
   });
-  bot.command("backup", async (ctx) => {
+});
+
+//////////////////////////////
+// 💾 BACKUP ADMIN
+//////////////////////////////
+
+bot.command("backup", async (ctx) => {
   if (!isAdmin(ctx)) {
     return ctx.reply("❌ Accès refusé.");
   }
@@ -205,22 +211,21 @@ bot.command("admin", async (ctx) => {
     const dataFile = "/data/data.json";
 
     if (!fs.existsSync(dataFile)) {
-      return ctx.reply("❌ Aucun fichier data.json trouvé.");
+      return ctx.reply("❌ Le fichier /data/data.json est introuvable.");
     }
 
-    db.makeBackup("manual-telegram");
+    db.makeBackup("manual");
 
     await ctx.replyWithDocument({
-      source: dataFile,
-      filename: "BSP-data-backup.json"
+      source: fs.createReadStream(dataFile),
+      filename: `BSP-backup-${Date.now()}.json`
     });
 
     await ctx.reply("✅ Sauvegarde envoyée avec succès.");
   } catch (err) {
-    console.error(err);
-    await ctx.reply("❌ Erreur pendant la sauvegarde.");
+    console.error("Erreur /backup :", err);
+    await ctx.reply(`❌ Erreur backup : ${err.message}`);
   }
-});
 });
 
 bot.action("admin_list_plugs", async (ctx) => {
@@ -334,9 +339,7 @@ bot.command("cancel", async (ctx) => {
 
   delete adminSessions[ctx.from.id];
   await ctx.reply("❌ Action annulée.");
-});
-
-bot.action(/^edit_field_(.+)$/, async (ctx) => {
+});bot.action(/^edit_field_(.+)$/, async (ctx) => {
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   const field = ctx.match[1];
