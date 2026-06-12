@@ -18,6 +18,14 @@ function initData() {
       )
     );
   }
+
+  const data = JSON.parse(fs.readFileSync(dataFile, "utf8"));
+
+  if (!data.users) data.users = [];
+  if (!data.votes) data.votes = [];
+  if (!data.plugs) data.plugs = [];
+
+  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
 }
 
 function readData() {
@@ -38,23 +46,39 @@ module.exports = {
 
     const newPlug = {
       id: Date.now(),
-      name: plug.name,
-      city: plug.city || "France",
+      name: plug.name || "",
+      sector: plug.sector || "",
+      city: plug.city || "",
+      description: plug.description || "",
       image: plug.image || "",
-      link: plug.link || "",
+      telegram: plug.telegram || "",
+      instagram: plug.instagram || "",
+      potato: plug.potato || "",
+      luffa: plug.luffa || "",
       votes: 0,
       created_at: new Date().toISOString()
     };
 
     data.plugs.push(newPlug);
     writeData(data);
-
     return newPlug;
   },
 
   getPlugs() {
     const data = readData();
     return data.plugs || [];
+  },
+
+  updatePlug(id, updates) {
+    const data = readData();
+    const plug = data.plugs.find(p => String(p.id) === String(id));
+
+    if (!plug) return null;
+
+    Object.assign(plug, updates);
+    writeData(data);
+
+    return plug;
   },
 
   deletePlug(id) {
