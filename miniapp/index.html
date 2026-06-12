@@ -4,28 +4,27 @@
   <meta charset="UTF-8" />
   <title>BOOSKABOT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
       font-family: Arial, sans-serif;
-      color: white;
-      background:
-        radial-gradient(circle at top, #34105c 0%, #12051f 35%, #050509 100%);
+      color: #fff;
+      background: #07101a;
       overflow-x: hidden;
     }
 
     .loading {
       position: fixed;
       inset: 0;
-      background: #050509;
+      background: #07101a;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -33,162 +32,296 @@
       z-index: 999;
     }
 
-    .logo-loader {
-      width: 90px;
-      height: 90px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #7b2cff, #00ffd5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 38px;
-      animation: pulse 1.2s infinite ease-in-out;
-      box-shadow: 0 0 35px rgba(123, 44, 255, 0.6);
+    .loader {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,.12);
+      border-top-color: #18d5ff;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 35px rgba(24,213,255,.35);
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.08); opacity: 0.85; }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .loading-text {
-      margin-top: 18px;
-      font-size: 15px;
-      color: #d8d8d8;
+      margin-top: 14px;
+      color: #9fb4c8;
+      font-size: 13px;
+      letter-spacing: .4px;
     }
 
     .app {
       display: none;
-      padding: 18px;
-      animation: fadeIn 0.5s ease;
+      min-height: 100vh;
+      padding-bottom: 92px;
+      animation: fadeIn .35s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .hero {
-      padding: 24px 18px;
-      border-radius: 28px;
+    .banner {
+      height: 155px;
+      padding: 18px;
+      display: flex;
+      align-items: flex-end;
       background:
-        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      text-align: left;
+        linear-gradient(to bottom, rgba(7,16,26,.1), #07101a),
+        radial-gradient(circle at 20% 20%, rgba(24,213,255,.55), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(255,59,148,.45), transparent 28%),
+        linear-gradient(135deg, #103c70, #19142d 55%, #08111a);
+      position: relative;
+      overflow: hidden;
     }
 
-    .badge {
-      display: inline-block;
-      padding: 7px 12px;
-      border-radius: 999px;
+    .banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 22px 22px;
+      opacity: .35;
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .banner h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: .5px;
+      text-shadow: 0 4px 18px rgba(0,0,0,.5);
+    }
+
+    .banner p {
+      margin: 8px 0 0;
+      color: #bfeeff;
       font-size: 12px;
-      background: rgba(0,255,213,0.13);
-      color: #00ffd5;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .content {
+      padding: 16px;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 14px;
     }
 
-    .title {
-      font-size: 30px;
-      font-weight: 900;
-      margin: 0;
-      line-height: 1.05;
-    }
-
-    .subtitle {
-      margin-top: 12px;
-      color: #cfcfe8;
-      font-size: 15px;
-      line-height: 1.5;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .stat {
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .stat strong {
-      display: block;
+    .page-title {
+      flex: 1;
       font-size: 22px;
+      font-weight: 900;
     }
 
-    .stat span {
-      font-size: 12px;
-      color: #bdbdd5;
+    .page-title span {
+      color: #1bcfff;
+      font-size: 14px;
+      margin-left: 5px;
     }
 
-    .section-title {
-      margin: 26px 0 12px;
-      font-size: 18px;
-      font-weight: 800;
-      text-align: left;
-    }
-
-    .card {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
-      text-decoration: none;
-      color: white;
-      transition: 0.2s;
-    }
-
-    .card:active {
-      transform: scale(0.97);
-      background: rgba(255,255,255,0.14);
-    }
-
-    .icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #7b2cff, #00ffd5);
+    .circle-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #101d2b;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
+      color: #9fc6dd;
+      font-size: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
     }
 
-    .card-content {
+    .search {
+      height: 46px;
+      border-radius: 16px;
+      background: #101b28;
+      border: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      margin-bottom: 16px;
+      color: #7890a6;
+    }
+
+    .search input {
       flex: 1;
-      text-align: left;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 15px;
     }
 
-    .card-content strong {
-      display: block;
-      font-size: 16px;
+    .search input::placeholder {
+      color: #7890a6;
     }
 
-    .card-content span {
-      font-size: 13px;
-      color: #bdbdd5;
+    .plug-card {
+      display: grid;
+      grid-template-columns: 38% 1fr;
+      gap: 12px;
+      min-height: 150px;
+      margin-bottom: 14px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #101b28, #09131f);
+      border: 1px solid rgba(255,255,255,.09);
+      overflow: hidden;
+      box-shadow: 0 14px 35px rgba(0,0,0,.28);
     }
 
-    .arrow {
-      opacity: 0.6;
-      font-size: 20px;
+    .plug-img {
+      position: relative;
+      min-height: 150px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(24,213,255,.8), transparent 28%),
+        radial-gradient(circle at 70% 70%, rgba(255,59,148,.7), transparent 32%),
+        linear-gradient(135deg, #162846, #070d16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      font-weight: 900;
     }
 
-    .footer {
-      margin-top: 28px;
-      text-align: center;
-      color: #8585a3;
+    .plug-img.orange {
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,140,0,.8), transparent 28%),
+        radial-gradient(circle at 70% 70%, rgba(255,60,60,.55), transparent 32%),
+        linear-gradient(135deg, #3a2412, #070d16);
+    }
+
+    .plug-img.green {
+      background:
+        radial-gradient(circle at 30% 20%, rgba(0,255,160,.8), transparent 28%),
+        radial-gradient(circle at 70% 70%, rgba(0,110,255,.55), transparent 32%),
+        linear-gradient(135deg, #12342b, #070d16);
+    }
+
+    .rating {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.55);
       font-size: 12px;
+      font-weight: 800;
+    }
+
+    .plug-info {
+      padding: 12px 12px 12px 0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .plug-name {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 7px;
+      letter-spacing: .3px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .tag.green {
+      color: #39ffb5;
+      background: rgba(57,255,181,.1);
+    }
+
+    .tag.orange {
+      color: #ffb45c;
+      background: rgba(255,180,92,.11);
+    }
+
+    .tag.blue {
+      color: #5fd8ff;
+      background: rgba(95,216,255,.12);
+    }
+
+    .desc {
+      color: #9eb1c5;
+      font-size: 12px;
+      line-height: 1.35;
+      margin-bottom: 10px;
+      flex: 1;
+    }
+
+    .info-btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 12px;
+      background: linear-gradient(90deg, #0c78b8, #14b8ff);
+      color: #dff7ff;
+      font-size: 12px;
+      font-weight: 900;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+      box-shadow: 0 7px 20px rgba(20,184,255,.22);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      height: 62px;
+      border-radius: 24px;
+      background: rgba(12,22,34,.9);
+      border: 1px solid rgba(255,255,255,.1);
+      backdrop-filter: blur(14px);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      box-shadow: 0 14px 40px rgba(0,0,0,.45);
+      z-index: 20;
+    }
+
+    .nav-item {
+      color: #83a1b8;
+      text-decoration: none;
+      text-align: center;
+      font-size: 22px;
+    }
+
+    .nav-item.active {
+      color: #19d4ff;
+      text-shadow: 0 0 18px rgba(25,212,255,.55);
     }
   </style>
 </head>
@@ -196,89 +329,120 @@
 <body>
 
   <div class="loading" id="loading">
-    <div class="logo-loader">🤖</div>
+    <div class="loader"></div>
     <div class="loading-text">Chargement de BOOSKABOT...</div>
   </div>
 
   <main class="app" id="app">
 
-    <section class="hero">
-      <div class="badge">🚀 Mini App officielle</div>
-      <h1 class="title">BOOSKABOT<br>Plug Battle</h1>
-      <p class="subtitle">
-        Vote, découvre les réseaux des plugs et suis le classement directement depuis Telegram.
-      </p>
-
-      <div class="stats">
-        <div class="stat">
-          <strong>0</strong>
-          <span>Votes affichés bientôt</span>
-        </div>
-        <div class="stat">
-          <strong>LIVE</strong>
-          <span>Classement en préparation</span>
-        </div>
+    <section class="banner">
+      <div class="banner-content">
+        <h1>BOOSKABOT</h1>
+        <p>Plug Battle • Mini App officielle</p>
       </div>
     </section>
 
-    <h2 class="section-title">Navigation</h2>
+    <section class="content">
 
-    <a class="card" href="#">
-      <div class="icon">🗳️</div>
-      <div class="card-content">
-        <strong>Voir les votes</strong>
-        <span>Classement des plugs bientôt disponible</span>
+      <div class="top-row">
+        <div class="page-title">Plugs Certifiés <span>3 résultats</span></div>
+        <div class="circle-btn">⚙️</div>
+        <div class="circle-btn">☰</div>
+        <div class="circle-btn">🏆</div>
       </div>
-      <div class="arrow">›</div>
-    </a>
 
-    <a class="card" href="https://instagram.com/booskaplugofficiel">
-      <div class="icon">📸</div>
-      <div class="card-content">
-        <strong>Instagram</strong>
-        <span>Suivre BOOSKAPLUG officiel</span>
+      <div class="search">
+        🔎
+        <input type="text" placeholder="Rechercher par nom ou ville..." id="searchInput">
       </div>
-      <div class="arrow">›</div>
-    </a>
 
-    <a class="card" href="https://callup.luffa.im/c/Rh8K8YR2TNu">
-      <div class="icon">🟣</div>
-      <div class="card-content">
-        <strong>Luffa</strong>
-        <span>Accéder au réseau Luffa</span>
+      <div class="plug-list" id="plugList">
+
+        <article class="plug-card" data-name="luffa officiel">
+          <div class="plug-img">🟣
+            <div class="rating">⭐ 5.0</div>
+          </div>
+          <div class="plug-info">
+            <div class="plug-name">LUFFA OFFICIEL</div>
+            <div class="badges">
+              <span class="tag green">MEET-UP</span>
+              <span class="tag orange">LIVRAISON</span>
+              <span class="tag blue">FRANCE 🇫🇷</span>
+            </div>
+            <div class="desc">Réseau officiel BOOSKABOT. Accès rapide aux infos et aux liens importants.</div>
+            <a class="info-btn" href="https://callup.luffa.im/c/Rh8K8YR2TNu">VOIR LES INFOS →</a>
+          </div>
+        </article>
+
+        <article class="plug-card" data-name="instagram booskaplug">
+          <div class="plug-img orange">📸
+            <div class="rating">⭐ 5.0</div>
+          </div>
+          <div class="plug-info">
+            <div class="plug-name">INSTAGRAM</div>
+            <div class="badges">
+              <span class="tag green">ACTU</span>
+              <span class="tag blue">OFFICIEL ✅</span>
+            </div>
+            <div class="desc">Suis les annonces, nouveautés et mises à jour BOOSKAPLUG directement sur Instagram.</div>
+            <a class="info-btn" href="https://instagram.com/booskaplugofficiel">VOIR LES INFOS →</a>
+          </div>
+        </article>
+
+        <article class="plug-card" data-name="potato booskaplug">
+          <div class="plug-img green">🥔
+            <div class="rating">⭐ 5.0</div>
+          </div>
+          <div class="plug-info">
+            <div class="plug-name">POTATO</div>
+            <div class="badges">
+              <span class="tag green">CHAT</span>
+              <span class="tag orange">COMMUNAUTÉ</span>
+              <span class="tag blue">FRANCE 🇫🇷</span>
+            </div>
+            <div class="desc">Accède au réseau Potato de BOOSKAPLUG et rejoins la communauté.</div>
+            <a class="info-btn" href="https://tato.im/booskaplug1">VOIR LES INFOS →</a>
+          </div>
+        </article>
+
       </div>
-      <div class="arrow">›</div>
-    </a>
+    </section>
 
-    <a class="card" href="https://tato.im/booskaplug1">
-      <div class="icon">🥔</div>
-      <div class="card-content">
-        <strong>Potato</strong>
-        <span>Accéder au réseau Potato</span>
-      </div>
-      <div class="arrow">›</div>
-    </a>
-
-    <div class="footer">
-      BOOSKABOT © 2026 — Powered by Telegram
-    </div>
+    <nav class="bottom-nav">
+      <a class="nav-item active" href="#">🏠</a>
+      <a class="nav-item" href="#">🌐</a>
+      <a class="nav-item" href="#">💬</a>
+      <a class="nav-item" href="#">❔</a>
+      <a class="nav-item" href="#">☰</a>
+    </nav>
 
   </main>
 
   <script>
     const tg = window.Telegram.WebApp;
-
     tg.ready();
     tg.expand();
-    tg.setHeaderColor("#12051f");
-    tg.setBackgroundColor("#050509");
+    tg.setHeaderColor("#07101a");
+    tg.setBackgroundColor("#07101a");
 
     window.onload = () => {
       setTimeout(() => {
         document.getElementById("loading").style.display = "none";
         document.getElementById("app").style.display = "block";
-      }, 1000);
+      }, 800);
     };
+
+    const searchInput = document.getElementById("searchInput");
+    const cards = document.querySelectorAll(".plug-card");
+
+    searchInput.addEventListener("input", () => {
+      const value = searchInput.value.toLowerCase();
+
+      cards.forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        card.style.display = name.includes(value) ? "grid" : "none";
+      });
+    });
   </script>
 
 </body>
