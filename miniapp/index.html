@@ -93,9 +93,7 @@
       text-transform: uppercase;
     }
 
-    .content {
-      padding: 14px 16px 0;
-    }
+    .content { padding: 14px 16px 0; }
 
     .stats {
       display: grid;
@@ -152,7 +150,6 @@
       justify-content: center;
       align-items: center;
       color: #b8d9ff;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
     }
 
     .search {
@@ -199,21 +196,9 @@
       border-color: rgba(255,211,66,.25);
     }
 
-    .podium-rank {
-      font-size: 22px;
-      margin-bottom: 5px;
-    }
-
-    .podium-name {
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .podium-votes {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #9fb4c8;
-    }
+    .podium-rank { font-size: 22px; margin-bottom: 5px; }
+    .podium-name { font-size: 12px; font-weight: 900; }
+    .podium-votes { margin-top: 4px; font-size: 11px; color: #9fb4c8; }
 
     .plug-card {
       display: grid;
@@ -287,7 +272,6 @@
     .green { background: rgba(0,255,170,.12); color: #28ffb4; }
     .orange { background: rgba(255,155,55,.13); color: #ffb05c; }
     .blue { background: rgba(0,210,255,.13); color: #5de4ff; }
-    .purple { background: rgba(190,0,255,.14); color: #d476ff; }
 
     .desc {
       font-size: 12px;
@@ -322,6 +306,15 @@
       border-radius: 999px;
       background: linear-gradient(90deg, #008cff, #00d9ff);
       box-shadow: 0 8px 20px rgba(0,217,255,.22);
+    }
+
+    .empty {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      color: #9badc2;
+      text-align: center;
     }
 
     .bottom-nav {
@@ -374,13 +367,13 @@
     <section class="content">
 
       <div class="stats">
-        <div class="stat"><strong>3</strong><span>PLUGS</span></div>
-        <div class="stat"><strong>0</strong><span>VOTES</span></div>
+        <div class="stat"><strong id="plugCount">0</strong><span>PLUGS</span></div>
+        <div class="stat"><strong id="voteCount">0</strong><span>VOTES</span></div>
         <div class="stat"><strong>LIVE</strong><span>STATUS</span></div>
       </div>
 
       <div class="top-row">
-        <div class="title">Plugs Certifiés <span>3 résultats</span></div>
+        <div class="title">Plugs Certifiés <span id="resultCount">0 résultat</span></div>
         <div class="circle">⚙️</div>
         <div class="circle">☰</div>
         <div class="circle">🏆</div>
@@ -391,78 +384,9 @@
         <input id="searchInput" placeholder="Rechercher par nom ou ville..." />
       </div>
 
-      <div class="podium">
-        <div class="podium-card">
-          <div class="podium-rank">🥈</div>
-          <div class="podium-name">INSTAGRAM</div>
-          <div class="podium-votes">0 vote</div>
-        </div>
-        <div class="podium-card first">
-          <div class="podium-rank">🥇</div>
-          <div class="podium-name">LUFFA</div>
-          <div class="podium-votes">0 vote</div>
-        </div>
-        <div class="podium-card">
-          <div class="podium-rank">🥉</div>
-          <div class="podium-name">POTATO</div>
-          <div class="podium-votes">0 vote</div>
-        </div>
-      </div>
+      <div class="podium" id="podium"></div>
 
-      <article class="plug-card" data-name="luffa officiel">
-        <div class="plug-img">
-          <div class="rank">#1</div>
-          🟣
-          <div class="rating">⭐ 5.0</div>
-        </div>
-        <div class="plug-info">
-          <div class="plug-name">LUFFA OFFICIEL</div>
-          <div class="badges">
-            <span class="tag green">MEET-UP</span>
-            <span class="tag orange">LIVRAISON</span>
-            <span class="tag blue">FRANCE 🇫🇷</span>
-          </div>
-          <div class="desc">Réseau officiel BOOSKABOT. Accès rapide aux infos et liens importants.</div>
-          <div class="progress"><span style="width: 100%"></span></div>
-          <a class="btn" href="https://callup.luffa.im/c/Rh8K8YR2TNu">VOIR LES INFOS →</a>
-        </div>
-      </article>
-
-      <article class="plug-card" data-name="instagram booskaplug">
-        <div class="plug-img">
-          <div class="rank">#2</div>
-          📸
-          <div class="rating">⭐ 5.0</div>
-        </div>
-        <div class="plug-info">
-          <div class="plug-name">INSTAGRAM</div>
-          <div class="badges">
-            <span class="tag purple">OFFICIEL ✅</span>
-            <span class="tag blue">ACTU</span>
-          </div>
-          <div class="desc">Suis les annonces, nouveautés et mises à jour BOOSKAPLUG.</div>
-          <div class="progress"><span style="width: 70%"></span></div>
-          <a class="btn" href="https://instagram.com/booskaplugofficiel">VOIR LES INFOS →</a>
-        </div>
-      </article>
-
-      <article class="plug-card" data-name="potato booskaplug">
-        <div class="plug-img">
-          <div class="rank">#3</div>
-          🥔
-          <div class="rating">⭐ 5.0</div>
-        </div>
-        <div class="plug-info">
-          <div class="plug-name">POTATO</div>
-          <div class="badges">
-            <span class="tag green">CHAT</span>
-            <span class="tag orange">COMMUNAUTÉ</span>
-          </div>
-          <div class="desc">Rejoins la communauté Potato de BOOSKAPLUG.</div>
-          <div class="progress"><span style="width: 45%"></span></div>
-          <a class="btn" href="https://tato.im/booskaplug1">VOIR LES INFOS →</a>
-        </div>
-      </article>
+      <div id="plugList"></div>
 
     </section>
 
@@ -483,24 +407,120 @@
     tg.setHeaderColor("#05070d");
     tg.setBackgroundColor("#05070d");
 
-    window.onload = () => {
+    const API_URL = "https://booskabot.onrender.com/plugs";
+    let allPlugs = [];
+
+    window.onload = async () => {
       setTimeout(() => {
         document.getElementById("loading").style.display = "none";
         document.getElementById("app").style.display = "block";
       }, 800);
+
+      await loadPlugs();
     };
 
-    const searchInput = document.getElementById("searchInput");
-    const cards = document.querySelectorAll(".plug-card");
+    async function loadPlugs() {
+      try {
+        const res = await fetch(API_URL);
+        allPlugs = await res.json();
 
-    searchInput.addEventListener("input", () => {
-      const value = searchInput.value.toLowerCase();
+        renderPlugs(allPlugs);
+        renderPodium(allPlugs);
+      } catch (error) {
+        document.getElementById("plugList").innerHTML =
+          `<div class="empty">Impossible de charger les plugs pour le moment.</div>`;
+      }
+    }
 
-      cards.forEach(card => {
-        card.style.display = card.dataset.name.toLowerCase().includes(value)
-          ? "grid"
-          : "none";
+    function renderPodium(plugs) {
+      const podium = document.getElementById("podium");
+      const top = plugs.slice(0, 3);
+
+      if (!top.length) {
+        podium.innerHTML = "";
+        return;
+      }
+
+      const second = top[1];
+      const first = top[0];
+      const third = top[2];
+
+      podium.innerHTML = `
+        <div class="podium-card">
+          <div class="podium-rank">🥈</div>
+          <div class="podium-name">${second ? second.name : "-"}</div>
+          <div class="podium-votes">${second ? second.votes || 0 : 0} vote</div>
+        </div>
+        <div class="podium-card first">
+          <div class="podium-rank">🥇</div>
+          <div class="podium-name">${first ? first.name : "-"}</div>
+          <div class="podium-votes">${first ? first.votes || 0 : 0} vote</div>
+        </div>
+        <div class="podium-card">
+          <div class="podium-rank">🥉</div>
+          <div class="podium-name">${third ? third.name : "-"}</div>
+          <div class="podium-votes">${third ? third.votes || 0 : 0} vote</div>
+        </div>
+      `;
+    }
+
+    function renderPlugs(plugs) {
+      const list = document.getElementById("plugList");
+
+      document.getElementById("plugCount").textContent = plugs.length;
+      document.getElementById("resultCount").textContent =
+        `${plugs.length} ${plugs.length > 1 ? "résultats" : "résultat"}`;
+
+      if (!plugs.length) {
+        list.innerHTML = `<div class="empty">Aucun plug enregistré pour le moment.</div>`;
+        return;
+      }
+
+      list.innerHTML = plugs.map((plug, index) => {
+        const imageStyle = plug.image
+          ? `style="background: url('${plug.image}') center/cover no-repeat;"`
+          : "";
+
+        const emoji = plug.image ? "" : "🔥";
+
+        return `
+          <article class="plug-card" data-name="${plug.name} ${plug.city}">
+            <div class="plug-img" ${imageStyle}>
+              <div class="rank">#${index + 1}</div>
+              ${emoji}
+              <div class="rating">⭐ 5.0</div>
+            </div>
+
+            <div class="plug-info">
+              <div class="plug-name">${plug.name}</div>
+
+              <div class="badges">
+                <span class="tag green">MEET-UP</span>
+                <span class="tag orange">LIVRAISON</span>
+                <span class="tag blue">${plug.city || "FRANCE 🇫🇷"}</span>
+              </div>
+
+              <div class="desc">Plug ajouté depuis le panel admin BOOSKABOT.</div>
+
+              <div class="progress">
+                <span style="width: 100%"></span>
+              </div>
+
+              <a class="btn" href="${plug.link || "#"}">VOIR LES INFOS →</a>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("searchInput").addEventListener("input", () => {
+      const value = document.getElementById("searchInput").value.toLowerCase();
+
+      const filtered = allPlugs.filter(plug => {
+        return `${plug.name} ${plug.city}`.toLowerCase().includes(value);
       });
+
+      renderPlugs(filtered);
     });
   </script>
 
