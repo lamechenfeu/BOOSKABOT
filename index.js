@@ -10,6 +10,46 @@ const BOT_URL = "https://booskabot.vercel.app";
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 //////////////////////////////
+// 👤 SAUVEGARDE UTILISATEUR
+//////////////////////////////
+
+function saveUser(ctx) {
+  try {
+    if (!ctx.from) return;
+
+    const data = db.readData();
+
+    if (!data.users) data.users = [];
+
+    const user = ctx.from;
+    const existing = data.users.find(u => String(u.id) === String(user.id));
+
+    const userData = {
+      id: user.id,
+      username: user.username || "",
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      language_code: user.language_code || "",
+      is_bot: user.is_bot || false,
+      last_seen_at: new Date().toISOString()
+    };
+
+    if (existing) {
+      Object.assign(existing, userData);
+    } else {
+      data.users.push({
+        ...userData,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    db.writeData(data);
+  } catch (err) {
+    console.error("Erreur sauvegarde utilisateur :", err.message);
+  }
+}
+
+//////////////////////////////
 // 📊 COMPTEUR GLOBAL
 //////////////////////////////
 
@@ -31,6 +71,8 @@ function getTotalVotes() {
 //////////////////////////////
 
 bot.start(async (ctx) => {
+  saveUser(ctx);
+
   await ctx.replyWithPhoto(
     { source: './logo.png' },
     {
@@ -59,6 +101,7 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 //////////////////////////////
 
 bot.action("votes", async (ctx) => {
+  saveUser(ctx);
   await ctx.answerCbQuery();
 
   const total = await getTotalVotes();
@@ -82,6 +125,8 @@ bot.action("votes", async (ctx) => {
 //////////////////////////////
 
 bot.action("vote", async (ctx) => {
+  saveUser(ctx);
+
   const userId = ctx.from.id;
 
   db.get(
@@ -106,6 +151,7 @@ bot.action("vote", async (ctx) => {
 //////////////////////////////
 
 bot.action("reseaux", async (ctx) => {
+  saveUser(ctx);
   await ctx.answerCbQuery();
 
   await ctx.editMessageCaption(
@@ -129,6 +175,7 @@ Choisissez une plateforme :`,
 //////////////////////////////
 
 bot.action("retour_menu", async (ctx) => {
+  saveUser(ctx);
   await ctx.answerCbQuery();
 
   await ctx.editMessageCaption(
@@ -155,11 +202,15 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 // 🛠️ ADMIN
 //////////////////////////////
 
-const ADMIN_IDS = ["6832036781"];
+const ADMIN_IDS = (process.env.ADMIN_IDS || "6832036781")
+  .split(",")
+  .map(id => id.trim())
+  .filter(Boolean);
+
 const adminSessions = {};
 
 function isAdmin(ctx) {
-  return ADMIN_IDS.includes(String(ctx.from.id));
+  return ctx.from && ADMIN_IDS.includes(String(ctx.from.id));
 }
 
 function adminPanelKeyboard() {
@@ -189,6 +240,8 @@ function startEditPlugSession(userId) {
 }
 
 bot.command("admin", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) {
     return ctx.reply(`❌ Accès refusé.\nTon ID Telegram : ${ctx.from.id}`);
   }
@@ -203,6 +256,8 @@ bot.command("admin", async (ctx) => {
 //////////////////////////////
 
 bot.command("backup", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) {
     return ctx.reply("❌ Accès refusé.");
   }
@@ -228,7 +283,48 @@ bot.command("backup", async (ctx) => {
   }
 });
 
+//////////////////////////////
+// 👥 USERS ADMIN
+//////////////////////////////
+
+bot.command("users", async (ctx) => {
+  saveUser(ctx);
+
+  if (!isAdmin(ctx)) {
+    return ctx.reply("❌ Accès refusé.");
+  }
+
+  const data = db.readData();
+  const users = data.users || [];
+
+  if (!users.length) {
+    return ctx.reply("👥 Aucun utilisateur enregistré pour le moment.");
+  }
+
+  const list = users.map((u, i) => {
+    return `${i + 1}. ${u.first_name || "-"} ${u.last_name || ""}
+@${u.username || "sans_username"}
+🆔 ${u.id}
+🕒 Dernière activité : ${u.last_seen_at || "-"}`;
+  }).join("\n\n");
+
+  const message = `👥 Utilisateurs enregistrés : ${users.length}\n\n${list}`;
+
+  if (message.length > 3500) {
+    const dataFile = "/data/data.json";
+
+    return ctx.replyWithDocument({
+      source: fs.createReadStream(dataFile),
+      filename: `BSP-users-${Date.now()}.json`
+    });
+  }
+
+  await ctx.reply(message);
+});
+
 bot.action("admin_list_plugs", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   const plugs = db.getPlugs();
@@ -257,6 +353,8 @@ bot.action("admin_list_plugs", async (ctx) => {
 });
 
 bot.action("admin_add_plug", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   await ctx.answerCbQuery();
@@ -273,6 +371,8 @@ Pour annuler : /cancel`
 });
 
 bot.action("admin_edit_plug", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   await ctx.answerCbQuery();
@@ -299,6 +399,8 @@ Envoie l'ID du plug.`
 });
 
 bot.action("admin_delete_plug", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   await ctx.answerCbQuery();
@@ -323,6 +425,8 @@ ${list}
 });
 
 bot.command("delplug", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return ctx.reply("❌ Accès refusé");
 
   const id = ctx.message.text.replace("/delplug", "").trim();
@@ -335,11 +439,15 @@ bot.command("delplug", async (ctx) => {
 });
 
 bot.command("cancel", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return;
 
   delete adminSessions[ctx.from.id];
   await ctx.reply("❌ Action annulée.");
 });bot.action(/^edit_field_(.+)$/, async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   const field = ctx.match[1];
@@ -375,6 +483,8 @@ bot.command("cancel", async (ctx) => {
 });
 
 bot.on("text", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return;
 
   const session = adminSessions[ctx.from.id];
@@ -486,6 +596,8 @@ Choisis ce que tu veux modifier :`, {
 });
 
 bot.on("photo", async (ctx) => {
+  saveUser(ctx);
+
   if (!isAdmin(ctx)) return;
 
   const session = adminSessions[ctx.from.id];
