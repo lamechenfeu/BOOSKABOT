@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>BOOSKABOT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
-  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial;
-      background: #0f0f0f;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
       color: white;
-      text-align: center;
+      background:
+        radial-gradient(circle at top, #34105c 0%, #12051f 35%, #050509 100%);
+      overflow-x: hidden;
     }
 
     .loading {
       position: fixed;
-      width: 100%;
-      height: 100vh;
-      background: #0f0f0f;
+      inset: 0;
+      background: #050509;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -29,44 +33,162 @@
       z-index: 999;
     }
 
-    .loader {
-      width: 60px;
-      height: 60px;
-      border: 6px solid #333;
-      border-top: 6px solid #00ffcc;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+    .logo-loader {
+      width: 90px;
+      height: 90px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #7b2cff, #00ffd5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      animation: pulse 1.2s infinite ease-in-out;
+      box-shadow: 0 0 35px rgba(123, 44, 255, 0.6);
     }
 
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
     }
 
     .loading-text {
-      margin-top: 15px;
-      opacity: 0.8;
+      margin-top: 18px;
+      font-size: 15px;
+      color: #d8d8d8;
     }
 
     .app {
       display: none;
+      padding: 18px;
+      animation: fadeIn 0.5s ease;
     }
 
-    .header {
-      padding: 20px;
-      font-size: 24px;
-      font-weight: bold;
-      background: #1a1a1a;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .btn {
+    .hero {
+      padding: 24px 18px;
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      text-align: left;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(0,255,213,0.13);
+      color: #00ffd5;
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 900;
+      margin: 0;
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      color: #cfcfe8;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat strong {
       display: block;
-      margin: 15px auto;
-      padding: 15px;
-      width: 80%;
-      border-radius: 12px;
-      background: #2b2b2b;
-      color: white;
+      font-size: 22px;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: #bdbdd5;
+    }
+
+    .section-title {
+      margin: 26px 0 12px;
+      font-size: 18px;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
       text-decoration: none;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .card:active {
+      transform: scale(0.97);
+      background: rgba(255,255,255,0.14);
+    }
+
+    .icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #7b2cff, #00ffd5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .card-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .card-content strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .card-content span {
+      font-size: 13px;
+      color: #bdbdd5;
+    }
+
+    .arrow {
+      opacity: 0.6;
+      font-size: 20px;
+    }
+
+    .footer {
+      margin-top: 28px;
+      text-align: center;
+      color: #8585a3;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -74,29 +196,88 @@
 <body>
 
   <div class="loading" id="loading">
-    <div class="loader"></div>
-    <div class="loading-text">Chargement...</div>
+    <div class="logo-loader">🤖</div>
+    <div class="loading-text">Chargement de BOOSKABOT...</div>
   </div>
 
-  <div class="app" id="app">
-    <div class="header">👋 BOOSKABOT MINI APP</div>
+  <main class="app" id="app">
 
-    <a class="btn" href="#">🗳️ Votes</a>
-    <a class="btn" href="https://instagram.com/booskaplugofficiel">📸 Instagram</a>
-    <a class="btn" href="https://callup.luffa.im/c/Rh8K8YR2TNu">🟣 Luffa</a>
-  </div>
+    <section class="hero">
+      <div class="badge">🚀 Mini App officielle</div>
+      <h1 class="title">BOOSKABOT<br>Plug Battle</h1>
+      <p class="subtitle">
+        Vote, découvre les réseaux des plugs et suis le classement directement depuis Telegram.
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <strong>0</strong>
+          <span>Votes affichés bientôt</span>
+        </div>
+        <div class="stat">
+          <strong>LIVE</strong>
+          <span>Classement en préparation</span>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="section-title">Navigation</h2>
+
+    <a class="card" href="#">
+      <div class="icon">🗳️</div>
+      <div class="card-content">
+        <strong>Voir les votes</strong>
+        <span>Classement des plugs bientôt disponible</span>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="card" href="https://instagram.com/booskaplugofficiel">
+      <div class="icon">📸</div>
+      <div class="card-content">
+        <strong>Instagram</strong>
+        <span>Suivre BOOSKAPLUG officiel</span>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="card" href="https://callup.luffa.im/c/Rh8K8YR2TNu">
+      <div class="icon">🟣</div>
+      <div class="card-content">
+        <strong>Luffa</strong>
+        <span>Accéder au réseau Luffa</span>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <a class="card" href="https://tato.im/booskaplug1">
+      <div class="icon">🥔</div>
+      <div class="card-content">
+        <strong>Potato</strong>
+        <span>Accéder au réseau Potato</span>
+      </div>
+      <div class="arrow">›</div>
+    </a>
+
+    <div class="footer">
+      BOOSKABOT © 2026 — Powered by Telegram
+    </div>
+
+  </main>
 
   <script>
     const tg = window.Telegram.WebApp;
 
     tg.ready();
     tg.expand();
+    tg.setHeaderColor("#12051f");
+    tg.setBackgroundColor("#050509");
 
     window.onload = () => {
       setTimeout(() => {
         document.getElementById("loading").style.display = "none";
         document.getElementById("app").style.display = "block";
-      }, 1200);
+      }, 1000);
     };
   </script>
 
