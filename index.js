@@ -3,6 +3,7 @@ require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const db = require('./database');
 const http = require("http");
+const fs = require("fs");
 
 const BOT_URL = "https://booskabot.vercel.app";
 
@@ -195,6 +196,31 @@ bot.command("admin", async (ctx) => {
   await ctx.reply("🛠️ Panel Admin BOOSKABOT", {
     reply_markup: adminPanelKeyboard()
   });
+  bot.command("backup", async (ctx) => {
+  if (!isAdmin(ctx)) {
+    return ctx.reply("❌ Accès refusé.");
+  }
+
+  try {
+    const dataFile = "/data/data.json";
+
+    if (!fs.existsSync(dataFile)) {
+      return ctx.reply("❌ Aucun fichier data.json trouvé.");
+    }
+
+    db.makeBackup("manual-telegram");
+
+    await ctx.replyWithDocument({
+      source: dataFile,
+      filename: "BSP-data-backup.json"
+    });
+
+    await ctx.reply("✅ Sauvegarde envoyée avec succès.");
+  } catch (err) {
+    console.error(err);
+    await ctx.reply("❌ Erreur pendant la sauvegarde.");
+  }
+});
 });
 
 bot.action("admin_list_plugs", async (ctx) => {
