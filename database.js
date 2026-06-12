@@ -6,6 +6,8 @@ const BACKUP_DIR = path.join(DATA_DIR, "backups");
 const LOCAL_DATA_FILE = path.join(__dirname, "data.json");
 const DATA_FILE = path.join(DATA_DIR, "data.json");
 
+const MAX_BACKUPS = 30;
+
 function ensureDirs() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -35,16 +37,47 @@ function safeReadJson(file) {
   }
 }
 
+function cleanOldBackups() {
+  ensureDirs();
+
+  const files = fs.readdirSync(BACKUP_DIR)
+    .filter(file => file.endsWith(".json"))
+    .map(file => {
+      const fullPath = path.join(BACKUP_DIR, file);
+      const stat = fs.statSync(fullPath);
+
+      return {
+        file,
+        fullPath,
+        time: stat.mtime.getTime()
+      };
+    })
+    .sort((a, b) => b.time - a.time);
+
+  const oldFiles = files.slice(MAX_BACKUPS);
+
+  oldFiles.forEach(item => {
+    try {
+      fs.unlinkSync(item.fullPath);
+    } catch (err) {
+      console.error("Erreur suppression ancien backup :", err.message);
+    }
+  });
+}
+
 function makeBackup(reason = "auto") {
   ensureDirs();
 
-  if (!fs.existsSync(DATA_FILE)) return;
+  if (!fs.existsSync(DATA_FILE)) return null;
 
   const now = new Date();
   const stamp = now.toISOString().replace(/[:.]/g, "-");
   const backupFile = path.join(BACKUP_DIR, `backup-${reason}-${stamp}.json`);
 
   fs.copyFileSync(DATA_FILE, backupFile);
+  cleanOldBackups();
+
+  return backupFile;
 }
 
 function initData() {
@@ -54,7 +87,6 @@ function initData() {
 
   if (!data) {
     const localData = safeReadJson(LOCAL_DATA_FILE);
-
     data = localData || defaultData();
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
@@ -74,10 +106,7 @@ function readData() {
   const data = safeReadJson(DATA_FILE);
 
   if (!data) {
-    const brokenFile = path.join(
-      BACKUP_DIR,
-      `corrupted-${Date.now()}.json`
-    );
+    const brokenFile = path.join(BACKUP_DIR, `corrupted-${Date.now()}.json`);
 
     if (fs.existsSync(DATA_FILE)) {
       fs.copyFileSync(DATA_FILE, brokenFile);
@@ -85,6 +114,8 @@ function readData() {
 
     const freshData = defaultData();
     fs.writeFileSync(DATA_FILE, JSON.stringify(freshData, null, 2));
+    cleanOldBackups();
+
     return freshData;
   }
 
@@ -99,6 +130,7 @@ function writeData(data) {
   }
 
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  cleanOldBackups();
 }
 
 function dailyBackup() {
@@ -109,6 +141,7 @@ function dailyBackup() {
 
   if (!fs.existsSync(backupFile) && fs.existsSync(DATA_FILE)) {
     fs.copyFileSync(DATA_FILE, backupFile);
+    cleanOldBackups();
   }
 }
 
@@ -118,6 +151,8 @@ module.exports = {
   readData,
   writeData,
   makeBackup,
+  dailyBackup,
+  cleanOldBackups,
 
   addPlug(plug) {
     const data = readData();
