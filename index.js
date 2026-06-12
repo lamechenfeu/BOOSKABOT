@@ -320,12 +320,23 @@ bot.on("photo", async (ctx) => {
 });
 
 //////////////////////////////
-// 🌍 SERVEUR HTTP POUR RENDER
+// 🌍 SERVEUR HTTP POUR RENDER + API
 //////////////////////////////
 
 const PORT = process.env.PORT || 3000;
 
 http.createServer((req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.url === "/plugs") {
+    const plugs = db.getPlugs();
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(plugs));
+  }
+
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.end("BOOSKABOT est en ligne 🚀");
 }).listen(PORT, () => {
