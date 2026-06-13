@@ -204,9 +204,9 @@ Aucun plug disponible pour le moment.`,
   keyboard.push([{ text: "⬅️ RETOUR", callback_data: "retour_menu" }]);
 
   await ctx.editMessageCaption(
-`🗳️ VOTES DES PLUGS
+`🗳️ VOTES DES PLVGS
 
-Choisis un plug pour voir son profil ou voter :`,
+Choisis un 🔌 pour voir son profil ou voter :`,
     {
       reply_markup: {
         inline_keyboard: keyboard
