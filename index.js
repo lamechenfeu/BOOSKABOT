@@ -13,7 +13,7 @@ const accessBot = process.env.ACCESS_BOT_TOKEN
   ? new Telegraf(process.env.ACCESS_BOT_TOKEN)
   : null;
 
-const MAIN_BOT_USERNAME = process.env.MAIN_BOT_USERNAME || "";
+const MAIN_BOT_USERNAME = process.env.MAIN_BOT_USERNAME || "booskaplugbot";
 
 //////////////////////////////
 // 👤 SAUVEGARDE UTILISATEUR
@@ -24,7 +24,6 @@ function saveUser(ctx) {
     if (!ctx.from) return;
 
     const data = db.readData();
-
     if (!data.users) data.users = [];
 
     const user = ctx.from;
@@ -73,36 +72,6 @@ function getTotalVotes() {
 }
 
 //////////////////////////////
-// 🚀 START BOT PRINCIPAL
-//////////////////////////////
-
-bot.start(async (ctx) => {
-  saveUser(ctx);
-
-  await ctx.replyWithPhoto(
-    { source: './logo.png' },
-    {
-      caption: `👋 Bienvenue sur BOOSKABOT
-
-Cliquez sur les boutons du dessous pour naviguer !`,
-
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "🗳️ VOTES", callback_data: "votes" }],
-          [{
-            text: "📱 MINI APP",
-            web_app: {
-              url: BOT_URL
-            }
-          }],
-          [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
-        ]
-      }
-    }
-  );
-});
-
-//////////////////////////////
 // 🗳️ VOTES PAR PLUG
 //////////////////////////////
 
@@ -126,6 +95,13 @@ function plugProfileKeyboard(plug) {
     [{ text: `🗳️ Voter pour ${plug.name}`, callback_data: `vote_plug_${plug.id}` }]
   ];
 
+  buttons.push([
+    {
+      text: "🔗 Lien pour voter",
+      url: `https://t.me/BSPStartBot?start=plug_${plug.id}`
+    }
+  ]);
+
   if (isValidUrl(plug.telegram || plug.link)) {
     buttons.push([{ text: "🔗 Telegram", url: plug.telegram || plug.link }]);
   }
@@ -146,6 +122,54 @@ function plugProfileKeyboard(plug) {
 
   return { inline_keyboard: buttons };
 }
+
+//////////////////////////////
+// 🚀 START BOT PRINCIPAL
+//////////////////////////////
+
+bot.start(async (ctx) => {
+  saveUser(ctx);
+
+  const payload = ctx.startPayload || "";
+
+  if (payload.startsWith("plug_")) {
+    const plugId = payload.replace("plug_", "");
+    const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
+
+    if (!plug) {
+      return ctx.reply("❌ Plug introuvable.");
+    }
+
+    return ctx.replyWithPhoto(
+      { source: "./logo.png" },
+      {
+        caption: plugProfileText(plug),
+        reply_markup: plugProfileKeyboard(plug)
+      }
+    );
+  }
+
+  await ctx.replyWithPhoto(
+    { source: './logo.png' },
+    {
+      caption: `👋 Bienvenue sur BOOSKABOT
+
+Cliquez sur les boutons du dessous pour naviguer !`,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🗳️ VOTES", callback_data: "votes" }],
+          [{
+            text: "📱 MINI APP",
+            web_app: {
+              url: BOT_URL
+            }
+          }],
+          [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
+        ]
+      }
+    }
+  );
+});
 
 bot.action("votes", async (ctx) => {
   saveUser(ctx);
@@ -234,9 +258,7 @@ bot.action(/^vote_plug_(.+)$/, async (ctx) => {
       reply_markup: plugProfileKeyboard(plug)
     }
   );
-});
-
-//////////////////////////////
+});//////////////////////////////
 // 🌐 RÉSEAUX
 //////////////////////////////
 
@@ -371,9 +393,7 @@ bot.command("backup", async (ctx) => {
     console.error("Erreur /backup :", err);
     await ctx.reply(`❌ Erreur backup : ${err.message}`);
   }
-});
-
-//////////////////////////////
+});//////////////////////////////
 // 👥 USERS ADMIN
 //////////////////////////////
 
@@ -535,7 +555,9 @@ bot.command("cancel", async (ctx) => {
 
   delete adminSessions[ctx.from.id];
   await ctx.reply("❌ Action annulée.");
-});bot.action(/^edit_field_(.+)$/, async (ctx) => {
+});
+
+bot.action(/^edit_field_(.+)$/, async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
@@ -570,9 +592,7 @@ bot.command("cancel", async (ctx) => {
   }
 
   return ctx.reply(`✏️ Envoie la nouvelle valeur pour : ${labels[field] || field}`);
-});
-
-bot.on("text", async (ctx) => {
+});bot.on("text", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -683,7 +703,9 @@ Choisis ce que tu veux modifier :`, {
 
     return ctx.reply(`✅ Plug modifié avec succès : ${plug.name}`);
   }
-});bot.on("photo", async (ctx) => {
+});
+
+bot.on("photo", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -746,6 +768,15 @@ Choisis ce que tu veux modifier :`, {
 
 if (accessBot) {
   accessBot.start(async (ctx) => {
+    const payload = ctx.startPayload || "";
+
+    let miniAppUrl = "https://booskabot.vercel.app/access.html";
+
+    if (payload.startsWith("plug_")) {
+      const plugId = payload.replace("plug_", "");
+      miniAppUrl = `https://booskabot.vercel.app/access.html?plug=${plugId}`;
+    }
+
     await ctx.replyWithPhoto(
       { source: "./logo.png" },
       {
@@ -758,7 +789,7 @@ Clique sur le bouton ci-dessous pour préparer ton accès.`,
               {
                 text: "🚀 Accéder à BSP",
                 web_app: {
-                  url: "https://booskabot.vercel.app/access.html"
+                  url: miniAppUrl
                 }
               }
             ]
