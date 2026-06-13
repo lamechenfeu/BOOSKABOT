@@ -696,11 +696,26 @@ http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "GET");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.url === "/plugs") {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+
+  if (url.pathname === "/plugs") {
     const plugs = db.getPlugs().sort((a, b) => (b.votes || 0) - (a.votes || 0));
 
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(plugs));
+  }
+
+  if (url.pathname === "/check-user") {
+    const id = url.searchParams.get("id");
+    const data = db.readData();
+    const users = data.users || [];
+
+    const exists = users.some(u => String(u.id) === String(id));
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({
+      exists
+    }));
   }
 
   res.writeHead(200, { "Content-Type": "text/plain" });

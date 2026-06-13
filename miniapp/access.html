@@ -18,6 +18,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
       overflow: hidden;
     }
 
@@ -26,9 +27,9 @@
       position: fixed;
       inset: -40px;
       background:
-        linear-gradient(rgba(5,7,13,.80), rgba(5,7,13,.92)),
+        linear-gradient(rgba(5,7,13,.82), rgba(5,7,13,.94)),
         url("bsp.png") center/cover no-repeat;
-      filter: blur(14px);
+      filter: blur(16px);
       transform: scale(1.08);
       opacity: .55;
       z-index: -2;
@@ -39,23 +40,22 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 35%, rgba(180,0,255,.22), transparent 34%),
-        linear-gradient(to bottom, rgba(5,7,13,.15), #05070d);
+        radial-gradient(circle at 50% 35%, rgba(180,0,255,.24), transparent 34%),
+        linear-gradient(to bottom, rgba(5,7,13,.1), #05070d);
       z-index: -1;
     }
 
-    .screen {
+    .box {
       width: 100%;
       max-width: 420px;
       padding: 28px;
-      text-align: center;
       animation: fadeUp .55s ease;
     }
 
     .logo {
       width: 96px;
       height: 96px;
-      margin: 0 auto 22px;
+      margin: 0 auto 24px;
       border-radius: 28px;
       background: url("bsp.png") center/cover no-repeat;
       box-shadow: 0 0 45px rgba(180, 0, 255, .75);
@@ -74,14 +74,14 @@
 
     h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 900;
       text-shadow: 0 0 18px rgba(180,0,255,.9);
     }
 
     p {
       margin: 12px auto 0;
-      max-width: 300px;
+      max-width: 310px;
       color: #a9b6c8;
       font-size: 14px;
       line-height: 1.45;
@@ -123,15 +123,14 @@
 </head>
 
 <body>
-  <main class="screen">
+  <main class="box">
     <div class="logo"></div>
-
     <div id="loader" class="loader"></div>
 
     <h1 id="title">Préparation...</h1>
-    <p id="text">Préparation de votre invitation...</p>
+    <p id="text">Vérification de votre accès BSP...</p>
 
-    <button id="joinBtn" class="join" onclick="joinBSP()">
+    <button id="joinBtn" class="join" onclick="openBSP(true)">
       Rejoindre BSP
     </button>
 
@@ -140,6 +139,8 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
+    const botLink = "https://t.me/booskaplugbot";
+    const apiUrl = "https://booskabot.onrender.com/check-user";
 
     if (tg) {
       tg.ready();
@@ -148,23 +149,70 @@
       tg.setBackgroundColor("#05070d");
     }
 
-    setTimeout(() => {
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("title").textContent = "Invitation prête";
-      document.getElementById("text").textContent =
-        "Votre invitation est prête. Touchez le bouton ci-dessous pour rejoindre BSP.";
-      document.getElementById("joinBtn").style.display = "block";
-    }, 1800);
-
-    function joinBSP() {
-      const link = "https://t.me/booskaplugbot";
-
-      if (tg && tg.openTelegramLink) {
-        tg.openTelegramLink(link);
-      } else {
-        window.location.href = link;
+    function getTelegramUserId() {
+      try {
+        return tg?.initDataUnsafe?.user?.id || null;
+      } catch (e) {
+        return null;
       }
     }
+
+    function openBSP(markJoined = false) {
+      if (markJoined) {
+        localStorage.setItem("bsp_join_clicked", "1");
+      }
+
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(botLink);
+      } else {
+        window.location.href = botLink;
+      }
+    }
+
+    async function checkUserExists(userId) {
+      try {
+        const res = await fetch(`${apiUrl}?id=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+        return data.exists === true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function startAccessFlow() {
+      const userId = getTelegramUserId();
+
+      let exists = false;
+
+      if (userId) {
+        exists = await checkUserExists(userId);
+      }
+
+      setTimeout(() => {
+        if (exists) {
+          document.getElementById("title").textContent = "Accès validé";
+          document.getElementById("text").textContent = "Ouverture de BSP...";
+          openBSP(false);
+
+          setTimeout(() => {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("text").textContent =
+              "Si BSP ne s'ouvre pas automatiquement, touchez le bouton ci-dessous.";
+            document.getElementById("joinBtn").style.display = "block";
+          }, 1500);
+
+          return;
+        }
+
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("title").textContent = "Invitation prête";
+        document.getElementById("text").textContent =
+          "Votre invitation est prête. Touchez le bouton ci-dessous pour rejoindre BSP.";
+        document.getElementById("joinBtn").style.display = "block";
+      }, 1800);
+    }
+
+    startAccessFlow();
   </script>
 </body>
 </html>
