@@ -173,7 +173,9 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 
 bot.action("votes", async (ctx) => {
   saveUser(ctx);
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   const plugs = db.getPlugs();
 
@@ -215,7 +217,9 @@ Choisis un plug pour voir son profil ou voter :`,
 
 bot.action(/^plug_profile_(.+)$/, async (ctx) => {
   saveUser(ctx);
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   const plugId = ctx.match[1];
   const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
@@ -264,7 +268,9 @@ bot.action(/^vote_plug_(.+)$/, async (ctx) => {
 
 bot.action("reseaux", async (ctx) => {
   saveUser(ctx);
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   await ctx.editMessageCaption(
 `🌐 NOS RÉSEAUX
@@ -288,7 +294,9 @@ Choisissez une plateforme :`,
 
 bot.action("retour_menu", async (ctx) => {
   saveUser(ctx);
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   await ctx.editMessageCaption(
 `👋 Bienvenue sur BOOSKABOT
@@ -440,7 +448,9 @@ bot.action("admin_list_plugs", async (ctx) => {
   const plugs = db.getPlugs();
 
   if (!plugs.length) {
-    await ctx.answerCbQuery();
+    try {
+  await ctx.answerCbQuery();
+} catch (e) {}
     return ctx.reply("📋 Aucun plug enregistré pour le moment.");
   }
 
@@ -458,7 +468,9 @@ bot.action("admin_list_plugs", async (ctx) => {
 🆔 ${p.id}`;
   }).join("\n\n");
 
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
   await ctx.reply(`📋 Liste des plugs :\n\n${list}`);
 });
 
@@ -467,7 +479,9 @@ bot.action("admin_add_plug", async (ctx) => {
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   startAddPlugSession(ctx.from.id);
 
@@ -485,7 +499,9 @@ bot.action("admin_edit_plug", async (ctx) => {
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   const plugs = db.getPlugs();
 
@@ -513,7 +529,9 @@ bot.action("admin_delete_plug", async (ctx) => {
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   const plugs = db.getPlugs();
 
@@ -566,14 +584,18 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
   const session = adminSessions[ctx.from.id];
 
   if (!session || session.mode !== "edit") {
-    await ctx.answerCbQuery();
+    try {
+  await ctx.answerCbQuery();
+} catch (e) {}
     return ctx.reply("❌ Aucune modification en cours. Retourne dans /admin.");
   }
 
   session.field = field;
   session.step = field === "image" ? "edit_photo" : "edit_value";
 
+  try {
   await ctx.answerCbQuery();
+} catch (e) {}
 
   const labels = {
     name: "nom",
