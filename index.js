@@ -6,6 +6,7 @@ const http = require("http");
 const fs = require("fs");
 
 const BOT_URL = "https://booskabot.vercel.app";
+const ACCESS_URL = `${BOT_URL}/access.html`;
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -90,6 +91,27 @@ function isValidUrl(value) {
     (value.startsWith("http://") || value.startsWith("https://"));
 }
 
+function mainMenuKeyboard() {
+  return {
+    inline_keyboard: [
+      [{ text: "🗳️ VOTES", callback_data: "votes" }],
+      [{
+        text: "📱 MINI APP",
+        web_app: {
+          url: BOT_URL
+        }
+      }],
+      [{
+        text: "🔐 TELEGRAM",
+        web_app: {
+          url: ACCESS_URL
+        }
+      }],
+      [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
+    ]
+  };
+}
+
 function plugProfileKeyboard(plug) {
   const buttons = [
     [{ text: `🗳️ Voter pour ${plug.name}`, callback_data: `vote_plug_${plug.id}` }]
@@ -98,12 +120,19 @@ function plugProfileKeyboard(plug) {
   buttons.push([
     {
       text: "🔗 Lien pour voter",
-      url: `https://t.me/BSPStartBot?start=plug_${plug.id}`
+      url: `https://t.me/${MAIN_BOT_USERNAME}?start=plug_${plug.id}`
     }
   ]);
 
   if (isValidUrl(plug.telegram || plug.link)) {
-    buttons.push([{ text: "🔗 Telegram", url: plug.telegram || plug.link }]);
+    buttons.push([
+      {
+        text: "🔐 TELEGRAM",
+        web_app: {
+          url: `${ACCESS_URL}?plug=${plug.id}`
+        }
+      }
+    ]);
   }
 
   if (isValidUrl(plug.instagram)) {
@@ -155,18 +184,7 @@ bot.start(async (ctx) => {
       caption: `👋 Bienvenue sur BOOSKABOT
 
 Cliquez sur les boutons du dessous pour naviguer !`,
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "🗳️ VOTES", callback_data: "votes" }],
-          [{
-            text: "📱 MINI APP",
-            web_app: {
-              url: BOT_URL
-            }
-          }],
-          [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
-        ]
-      }
+      reply_markup: mainMenuKeyboard()
     }
   );
 });
@@ -174,8 +192,8 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 bot.action("votes", async (ctx) => {
   saveUser(ctx);
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   const plugs = db.getPlugs();
 
@@ -218,8 +236,8 @@ Choisis un 🔌 pour voir son profil ou voter :`,
 bot.action(/^plug_profile_(.+)$/, async (ctx) => {
   saveUser(ctx);
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   const plugId = ctx.match[1];
   const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
@@ -262,15 +280,17 @@ bot.action(/^vote_plug_(.+)$/, async (ctx) => {
       reply_markup: plugProfileKeyboard(plug)
     }
   );
-});//////////////////////////////
+});
+
+//////////////////////////////
 // 🌐 RÉSEAUX
 //////////////////////////////
 
 bot.action("reseaux", async (ctx) => {
   saveUser(ctx);
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   await ctx.editMessageCaption(
 `🌐 NOS RÉSEAUX
@@ -295,30 +315,17 @@ Choisissez une plateforme :`,
 bot.action("retour_menu", async (ctx) => {
   saveUser(ctx);
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   await ctx.editMessageCaption(
 `👋 Bienvenue sur BOOSKABOT
 
 Cliquez sur les boutons du dessous pour naviguer !`,
 {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "🗳️ VOTES", callback_data: "votes" }],
-        [{
-          text: "📱 MINI APP",
-          web_app: {
-            url: BOT_URL
-          }
-        }],
-        [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
-      ]
-    }
+    reply_markup: mainMenuKeyboard()
   });
-});
-
-//////////////////////////////
+});//////////////////////////////
 // 🛠️ ADMIN
 //////////////////////////////
 
@@ -401,7 +408,9 @@ bot.command("backup", async (ctx) => {
     console.error("Erreur /backup :", err);
     await ctx.reply(`❌ Erreur backup : ${err.message}`);
   }
-});//////////////////////////////
+});
+
+//////////////////////////////
 // 👥 USERS ADMIN
 //////////////////////////////
 
@@ -449,8 +458,8 @@ bot.action("admin_list_plugs", async (ctx) => {
 
   if (!plugs.length) {
     try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+      await ctx.answerCbQuery();
+    } catch (e) {}
     return ctx.reply("📋 Aucun plug enregistré pour le moment.");
   }
 
@@ -469,8 +478,9 @@ bot.action("admin_list_plugs", async (ctx) => {
   }).join("\n\n");
 
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
+
   await ctx.reply(`📋 Liste des plugs :\n\n${list}`);
 });
 
@@ -480,8 +490,8 @@ bot.action("admin_add_plug", async (ctx) => {
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   startAddPlugSession(ctx.from.id);
 
@@ -492,16 +502,14 @@ bot.action("admin_add_plug", async (ctx) => {
 
 Pour annuler : /cancel`
   );
-});
-
-bot.action("admin_edit_plug", async (ctx) => {
+});bot.action("admin_edit_plug", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   const plugs = db.getPlugs();
 
@@ -530,8 +538,8 @@ bot.action("admin_delete_plug", async (ctx) => {
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
 
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   const plugs = db.getPlugs();
 
@@ -585,8 +593,9 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
 
   if (!session || session.mode !== "edit") {
     try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+      await ctx.answerCbQuery();
+    } catch (e) {}
+
     return ctx.reply("❌ Aucune modification en cours. Retourne dans /admin.");
   }
 
@@ -594,8 +603,8 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
   session.step = field === "image" ? "edit_photo" : "edit_value";
 
   try {
-  await ctx.answerCbQuery();
-} catch (e) {}
+    await ctx.answerCbQuery();
+  } catch (e) {}
 
   const labels = {
     name: "nom",
@@ -614,7 +623,9 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
   }
 
   return ctx.reply(`✏️ Envoie la nouvelle valeur pour : ${labels[field] || field}`);
-});bot.on("text", async (ctx) => {
+});
+
+bot.on("text", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -656,9 +667,7 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
       session.plug.link = text;
       session.step = "instagram";
       return ctx.reply("Étape 6/8 : envoie le lien INSTAGRAM, ou écris `non`.");
-    }
-
-    if (session.step === "instagram") {
+    }    if (session.step === "instagram") {
       session.plug.instagram = text.toLowerCase() === "non" ? "" : text;
       session.step = "potato";
       return ctx.reply("Étape 7/8 : envoie le lien POTATO, ou écris `non`.");
@@ -782,9 +791,7 @@ bot.on("photo", async (ctx) => {
 
     return ctx.reply(`✅ Photo modifiée pour : ${plug.name}`);
   }
-});
-
-//////////////////////////////
+});//////////////////////////////
 // 🚪 BOT PASSERELLE PUBLIC
 //////////////////////////////
 
@@ -792,11 +799,11 @@ if (accessBot) {
   accessBot.start(async (ctx) => {
     const payload = ctx.startPayload || "";
 
-    let miniAppUrl = "https://booskabot.vercel.app/access.html";
+    let miniAppUrl = ACCESS_URL;
 
     if (payload.startsWith("plug_")) {
       const plugId = payload.replace("plug_", "");
-      miniAppUrl = `https://booskabot.vercel.app/access.html?plug=${plugId}`;
+      miniAppUrl = `${ACCESS_URL}?plug=${plugId}`;
     }
 
     await ctx.reply(

@@ -2,19 +2,22 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>BSP Access</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accès Telegram</title>
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
-      background: #0b0d16;
-      color: white;
-      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #2b0050, #050008 55%, #000);
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -22,207 +25,83 @@
       overflow: hidden;
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: -40px;
-      background:
-        linear-gradient(rgba(5,7,13,.82), rgba(5,7,13,.94)),
-        url("bsp.png") center/cover no-repeat;
-      filter: blur(16px);
-      transform: scale(1.08);
-      opacity: .55;
-      z-index: -2;
-    }
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at 50% 35%, rgba(180,0,255,.24), transparent 34%),
-        linear-gradient(to bottom, rgba(5,7,13,.1), #05070d);
-      z-index: -1;
-    }
-
-    .box {
-      width: 100%;
+    .container {
+      width: 90%;
       max-width: 420px;
-      padding: 28px;
-      animation: fadeUp .55s ease;
+      padding: 30px 22px;
     }
 
     .logo {
-      width: 96px;
-      height: 96px;
-      margin: 0 auto 24px;
-      border-radius: 28px;
-      background: url("bsp.png") center/cover no-repeat;
-      box-shadow: 0 0 45px rgba(180, 0, 255, .75);
-      animation: pulse 1.25s infinite ease-in-out;
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      margin-bottom: 24px;
+      border-radius: 50%;
+      box-shadow: 0 0 35px rgba(180, 0, 255, 0.8);
     }
 
     .loader {
-      width: 46px;
-      height: 46px;
-      margin: 0 auto 22px;
+      width: 60px;
+      height: 60px;
+      border: 5px solid rgba(255, 255, 255, 0.2);
+      border-top: 5px solid #b600ff;
       border-radius: 50%;
-      border: 5px solid rgba(255,255,255,.12);
-      border-top-color: #28c7ff;
       animation: spin 1s linear infinite;
+      margin: 0 auto 22px;
     }
 
     h1 {
-      margin: 0;
       font-size: 24px;
-      font-weight: 900;
-      text-shadow: 0 0 18px rgba(180,0,255,.9);
+      margin: 0 0 12px;
+      letter-spacing: 0.5px;
     }
 
     p {
-      margin: 12px auto 0;
-      max-width: 310px;
-      color: #a9b6c8;
-      font-size: 14px;
-      line-height: 1.45;
-      font-weight: 700;
-    }
-
-    .join {
-      display: none;
-      margin-top: 26px;
-      width: 100%;
-      border: none;
-      border-radius: 16px;
-      padding: 15px 18px;
-      color: white;
-      font-size: 15px;
-      font-weight: 900;
-      background: linear-gradient(90deg, #008cff, #00d9ff);
-      box-shadow: 0 0 28px rgba(0,217,255,.35);
+      font-size: 16px;
+      opacity: 0.85;
+      margin: 0;
+      line-height: 1.5;
     }
 
     .small {
       margin-top: 18px;
-      font-size: 11px;
-      color: rgba(180,190,205,.55);
+      font-size: 13px;
+      opacity: 0.55;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.06); opacity: .86; }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
 
 <body>
-  <main class="box">
-    <div class="logo"></div>
-    <div id="loader" class="loader"></div>
+  <div class="container">
+    <img src="./logo.png" alt="BOOSKABOT" class="logo" />
 
-    <h1 id="title">Préparation...</h1>
-    <p id="text">Vérification de votre accès BSP...</p>
+    <div class="loader"></div>
 
-    <button id="joinBtn" class="join" onclick="openBSP(true)">
-      Rejoindre BSP
-    </button>
+    <h1>Connexion Telegram...</h1>
+    <p>Accès au canal en cours.<br>Veuillez patienter quelques secondes.</p>
 
-    <div class="small">Plateforme officielle BSP</div>
-  </main>
+    <div class="small">BOOSKABOT sécurise votre redirection</div>
+  </div>
 
   <script>
-    const tg = window.Telegram?.WebApp;
-    const apiUrl = "https://booskabot.onrender.com/check-user";
+    const TELEGRAM_LINK = "https://t.me/+aIfKkK6E6XplYmM8";
 
-    const params = new URLSearchParams(window.location.search);
-    const plugId = params.get("plug");
-
-    const botLink = plugId
-      ? `https://t.me/booskaplugbot?start=plug_${encodeURIComponent(plugId)}`
-      : "https://t.me/booskaplugbot";
+    const tg = window.Telegram && window.Telegram.WebApp;
 
     if (tg) {
       tg.ready();
       tg.expand();
-      tg.setHeaderColor("#05070d");
-      tg.setBackgroundColor("#05070d");
     }
 
-    function getTelegramUserId() {
-      try {
-        return tg?.initDataUnsafe?.user?.id || null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function openBSP(markJoined = false) {
-      if (markJoined) {
-        localStorage.setItem("bsp_join_clicked", "1");
-      }
-
-      if (tg && tg.openTelegramLink) {
-        tg.openTelegramLink(botLink);
-      } else {
-        window.location.href = botLink;
-      }
-    }
-
-    async function checkUserExists(userId) {
-      try {
-        const res = await fetch(`${apiUrl}?id=${encodeURIComponent(userId)}`);
-        const data = await res.json();
-        return data.exists === true;
-      } catch (e) {
-        return false;
-      }
-    }
-
-    async function startAccessFlow() {
-      const userId = getTelegramUserId();
-
-      let exists = false;
-
-      if (userId) {
-        exists = await checkUserExists(userId);
-      }
-
-      setTimeout(() => {
-        if (exists) {
-          document.getElementById("title").textContent = "Accès validé";
-          document.getElementById("text").textContent = plugId
-            ? "Ouverture du profil de vote..."
-            : "Ouverture de BSP...";
-
-          openBSP(false);
-
-          setTimeout(() => {
-            document.getElementById("loader").style.display = "none";
-            document.getElementById("text").textContent =
-              "Si BSP ne s'ouvre pas automatiquement, touchez le bouton ci-dessous.";
-            document.getElementById("joinBtn").style.display = "block";
-          }, 1500);
-
-          return;
-        }
-
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("title").textContent = "Invitation prête";
-        document.getElementById("text").textContent = plugId
-          ? "Touchez le bouton ci-dessous pour accéder au profil de vote."
-          : "Votre invitation est prête. Touchez le bouton ci-dessous pour rejoindre BSP.";
-        document.getElementById("joinBtn").style.display = "block";
-      }, 1800);
-    }
-
-    startAccessFlow();
+    setTimeout(() => {
+      window.location.href = TELEGRAM_LINK;
+    }, 1800);
   </script>
 </body>
 </html>
