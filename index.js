@@ -9,6 +9,12 @@ const BOT_URL = "https://booskabot.vercel.app";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+const accessBot = process.env.ACCESS_BOT_TOKEN
+  ? new Telegraf(process.env.ACCESS_BOT_TOKEN)
+  : null;
+
+const MAIN_BOT_USERNAME = process.env.MAIN_BOT_USERNAME || "";
+
 //////////////////////////////
 // 👤 SAUVEGARDE UTILISATEUR
 //////////////////////////////
@@ -67,7 +73,7 @@ function getTotalVotes() {
 }
 
 //////////////////////////////
-// 🚀 START
+// 🚀 START BOT PRINCIPAL
 //////////////////////////////
 
 bot.start(async (ctx) => {
@@ -593,9 +599,7 @@ Choisis ce que tu veux modifier :`, {
 
     return ctx.reply(`✅ Plug modifié avec succès : ${plug.name}`);
   }
-});
-
-bot.on("photo", async (ctx) => {
+});bot.on("photo", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -653,6 +657,36 @@ bot.on("photo", async (ctx) => {
 });
 
 //////////////////////////////
+// 🚪 BOT PASSERELLE PUBLIC
+//////////////////////////////
+
+if (accessBot) {
+  accessBot.start(async (ctx) => {
+    if (!MAIN_BOT_USERNAME) {
+      return ctx.reply("❌ Bot principal non configuré.");
+    }
+
+    await ctx.reply(
+`🔌 Bienvenue sur BSP
+
+Clique sur le bouton ci-dessous pour accéder à la plateforme officielle.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "🚀 Accéder à BSP",
+                url: `https://t.me/${MAIN_BOT_USERNAME}`
+              }
+            ]
+          ]
+        }
+      }
+    );
+  });
+}
+
+//////////////////////////////
 // 🌍 SERVEUR HTTP POUR RENDER + API
 //////////////////////////////
 
@@ -680,9 +714,19 @@ http.createServer((req, res) => {
 // 🚀 LAUNCH
 //////////////////////////////
 
-bot.launch()
+const launches = [bot.launch()];
+
+if (accessBot) {
+  launches.push(accessBot.launch());
+}
+
+Promise.all(launches)
   .then(() => {
-    console.log("Bot prêt 🚀");
+    console.log("Bot principal prêt 🚀");
+
+    if (accessBot) {
+      console.log("Bot passerelle prêt 🚪");
+    }
   })
   .catch((err) => {
     console.error("Erreur lancement bot :", err.message);
@@ -694,3 +738,13 @@ bot.launch()
       throw err;
     }
   });
+
+process.once("SIGINT", () => {
+  bot.stop("SIGINT");
+  if (accessBot) accessBot.stop("SIGINT");
+});
+
+process.once("SIGTERM", () => {
+  bot.stop("SIGTERM");
+  if (accessBot) accessBot.stop("SIGTERM");
+});
