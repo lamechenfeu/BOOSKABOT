@@ -189,7 +189,7 @@ bot.action(/^plug_profile_(.+)$/, async (ctx) => {
   await ctx.answerCbQuery();
 
   const plugId = ctx.match[1];
-  const plug = db.getPlug(plugId);
+  const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
 
   if (!plug) {
     return ctx.reply("❌ Plug introuvable.");
@@ -221,7 +221,7 @@ bot.action(/^vote_plug_(.+)$/, async (ctx) => {
 
   await ctx.answerCbQuery("✅ Vote enregistré !");
 
-  const plug = db.getPlug(plugId);
+  const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
 
   await ctx.editMessageCaption(
     plugProfileText(plug),
