@@ -116,24 +116,29 @@ function plugProfileText(plug) {
 📝 ${plug.description || "Aucune description."}`;
 }
 
+function isValidUrl(value) {
+  return typeof value === "string" &&
+    (value.startsWith("http://") || value.startsWith("https://"));
+}
+
 function plugProfileKeyboard(plug) {
   const buttons = [
     [{ text: `🗳️ Voter pour ${plug.name}`, callback_data: `vote_plug_${plug.id}` }]
   ];
 
-  if (plug.telegram || plug.link) {
+  if (isValidUrl(plug.telegram || plug.link)) {
     buttons.push([{ text: "🔗 Telegram", url: plug.telegram || plug.link }]);
   }
 
-  if (plug.instagram) {
+  if (isValidUrl(plug.instagram)) {
     buttons.push([{ text: "📸 Instagram", url: plug.instagram }]);
   }
 
-  if (plug.potato) {
+  if (isValidUrl(plug.potato)) {
     buttons.push([{ text: "🥔 Potato", url: plug.potato }]);
   }
 
-  if (plug.luffa) {
+  if (isValidUrl(plug.luffa)) {
     buttons.push([{ text: "🟣 Luffa", url: plug.luffa }]);
   }
 
