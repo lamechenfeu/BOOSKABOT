@@ -676,7 +676,7 @@ Clique sur le bouton ci-dessous pour accéder à la plateforme officielle.`,
             [
               {
                 text: "🚀 Accéder à BSP",
-                url: `https://t.me/${MAIN_BOT_USERNAME}`
+                url: "https://booskabot.vercel.app/access.html"
               }
             ]
           ]
