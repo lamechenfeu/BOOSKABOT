@@ -103,51 +103,130 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 });
 
 //////////////////////////////
-// 🗳️ VOTES
+// 🗳️ VOTES PAR PLUG
 //////////////////////////////
+
+function plugProfileText(plug) {
+  return `🔌 ${plug.name}
+
+📍 Ville : ${plug.city || "-"}
+📌 Secteur : ${plug.sector || "-"}
+🗳️ Votes : ${plug.votes || 0}
+
+📝 ${plug.description || "Aucune description."}`;
+}
+
+function plugProfileKeyboard(plug) {
+  const buttons = [
+    [{ text: `🗳️ Voter pour ${plug.name}`, callback_data: `vote_plug_${plug.id}` }]
+  ];
+
+  if (plug.telegram || plug.link) {
+    buttons.push([{ text: "🔗 Telegram", url: plug.telegram || plug.link }]);
+  }
+
+  if (plug.instagram) {
+    buttons.push([{ text: "📸 Instagram", url: plug.instagram }]);
+  }
+
+  if (plug.potato) {
+    buttons.push([{ text: "🥔 Potato", url: plug.potato }]);
+  }
+
+  if (plug.luffa) {
+    buttons.push([{ text: "🟣 Luffa", url: plug.luffa }]);
+  }
+
+  buttons.push([{ text: "⬅️ Retour aux votes", callback_data: "votes" }]);
+
+  return { inline_keyboard: buttons };
+}
 
 bot.action("votes", async (ctx) => {
   saveUser(ctx);
   await ctx.answerCbQuery();
 
-  const total = await getTotalVotes();
+  const plugs = db.getPlugs();
 
-  await ctx.editMessageCaption(
+  if (!plugs.length) {
+    return ctx.editMessageCaption(
 `🗳️ VOTES
 
-🔥 Total de votes : ${total}`,
-{
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "🗳️ VOTER", callback_data: "vote" }],
-        [{ text: "⬅️ RETOUR", callback_data: "retour_menu" }]
-      ]
-    }
+Aucun plug disponible pour le moment.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "⬅️ RETOUR", callback_data: "retour_menu" }]
+          ]
+        }
+      }
+    );
+  }
+
+  const keyboard = plugs.map((plug, index) => {
+    return [{
+      text: `#${index + 1} 🗳️ ${plug.name} — ${plug.votes || 0} vote${(plug.votes || 0) > 1 ? "s" : ""}`,
+      callback_data: `plug_profile_${plug.id}`
+    }];
   });
+
+  keyboard.push([{ text: "⬅️ RETOUR", callback_data: "retour_menu" }]);
+
+  await ctx.editMessageCaption(
+`🗳️ VOTES DES PLUGS
+
+Choisis un plug pour voir son profil ou voter :`,
+    {
+      reply_markup: {
+        inline_keyboard: keyboard
+      }
+    }
+  );
 });
 
-//////////////////////////////
-// 🗳️ VOTER
-//////////////////////////////
+bot.action(/^plug_profile_(.+)$/, async (ctx) => {
+  saveUser(ctx);
+  await ctx.answerCbQuery();
 
-bot.action("vote", async (ctx) => {
+  const plugId = ctx.match[1];
+  const plug = db.getPlug(plugId);
+
+  if (!plug) {
+    return ctx.reply("❌ Plug introuvable.");
+  }
+
+  await ctx.editMessageCaption(
+    plugProfileText(plug),
+    {
+      reply_markup: plugProfileKeyboard(plug)
+    }
+  );
+});
+
+bot.action(/^vote_plug_(.+)$/, async (ctx) => {
   saveUser(ctx);
 
+  const plugId = ctx.match[1];
   const userId = ctx.from.id;
 
-  db.get(
-    "SELECT * FROM votes WHERE user_id = ?",
-    [userId],
-    (err, row) => {
-      if (err) return ctx.answerCbQuery("❌ Erreur serveur");
+  const result = db.votePlug(userId, plugId);
 
-      if (row) {
-        return ctx.answerCbQuery("❌ Tu as déjà voté !");
-      }
+  if (!result.ok && result.reason === "already_voted") {
+    return ctx.answerCbQuery("❌ Tu as déjà voté pour ce plug !");
+  }
 
-      db.run("INSERT INTO votes(user_id) VALUES(?)", [userId]);
+  if (!result.ok) {
+    return ctx.answerCbQuery("❌ Plug introuvable.");
+  }
 
-      ctx.answerCbQuery("✅ Vote enregistré !");
+  await ctx.answerCbQuery("✅ Vote enregistré !");
+
+  const plug = db.getPlug(plugId);
+
+  await ctx.editMessageCaption(
+    plugProfileText(plug),
+    {
+      reply_markup: plugProfileKeyboard(plug)
     }
   );
 });

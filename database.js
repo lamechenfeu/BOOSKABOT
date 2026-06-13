@@ -22,6 +22,7 @@ function defaultData() {
   return {
     users: [],
     votes: [],
+    plugVotes: [],
     plugs: [],
     settings: {},
     created_at: new Date().toISOString()
@@ -94,8 +95,14 @@ function initData() {
 
   if (!data.users) data.users = [];
   if (!data.votes) data.votes = [];
+  if (!data.plugVotes) data.plugVotes = [];
   if (!data.plugs) data.plugs = [];
   if (!data.settings) data.settings = {};
+
+  data.plugs = data.plugs.map(plug => ({
+    ...plug,
+    votes: Number(plug.votes || 0)
+  }));
 
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
@@ -180,7 +187,18 @@ module.exports = {
 
   getPlugs() {
     const data = readData();
-    return data.plugs || [];
+
+    return (data.plugs || [])
+      .map(plug => ({
+        ...plug,
+        votes: Number(plug.votes || 0)
+      }))
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0));
+  },
+
+  getPlug(id) {
+    const data = readData();
+    return (data.plugs || []).find(p => String(p.id) === String(id)) || null;
   },
 
   updatePlug(id, updates) {
@@ -190,6 +208,8 @@ module.exports = {
     if (!plug) return null;
 
     Object.assign(plug, updates);
+    plug.votes = Number(plug.votes || 0);
+
     writeData(data);
 
     return plug;
@@ -197,8 +217,64 @@ module.exports = {
 
   deletePlug(id) {
     const data = readData();
+
     data.plugs = data.plugs.filter(p => String(p.id) !== String(id));
+    data.plugVotes = (data.plugVotes || []).filter(v => String(v.plug_id) !== String(id));
+
     writeData(data);
+  },
+
+  votePlug(userId, plugId) {
+    const data = readData();
+
+    if (!data.plugVotes) data.plugVotes = [];
+
+    const plug = data.plugs.find(p => String(p.id) === String(plugId));
+
+    if (!plug) {
+      return {
+        ok: false,
+        reason: "not_found"
+      };
+    }
+
+    const existingVote = data.plugVotes.find(v => {
+      return String(v.user_id) === String(userId) &&
+        String(v.plug_id) === String(plugId);
+    });
+
+    if (existingVote) {
+      return {
+        ok: false,
+        reason: "already_voted",
+        plug
+      };
+    }
+
+    data.plugVotes.push({
+      id: Date.now(),
+      user_id: userId,
+      plug_id: plugId,
+      created_at: new Date().toISOString()
+    });
+
+    plug.votes = Number(plug.votes || 0) + 1;
+
+    writeData(data);
+
+    return {
+      ok: true,
+      plug
+    };
+  },
+
+  hasUserVotedPlug(userId, plugId) {
+    const data = readData();
+
+    return (data.plugVotes || []).some(v => {
+      return String(v.user_id) === String(userId) &&
+        String(v.plug_id) === String(plugId);
+    });
   },
 
   get(query, params, callback) {
