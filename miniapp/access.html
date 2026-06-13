@@ -139,8 +139,14 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const botLink = "https://t.me/booskaplugbot";
     const apiUrl = "https://booskabot.onrender.com/check-user";
+
+    const params = new URLSearchParams(window.location.search);
+    const plugId = params.get("plug");
+
+    const botLink = plugId
+      ? `https://t.me/booskaplugbot?start=plug_${encodeURIComponent(plugId)}`
+      : "https://t.me/booskaplugbot";
 
     if (tg) {
       tg.ready();
@@ -191,7 +197,10 @@
       setTimeout(() => {
         if (exists) {
           document.getElementById("title").textContent = "Accès validé";
-          document.getElementById("text").textContent = "Ouverture de BSP...";
+          document.getElementById("text").textContent = plugId
+            ? "Ouverture du profil de vote..."
+            : "Ouverture de BSP...";
+
           openBSP(false);
 
           setTimeout(() => {
@@ -206,8 +215,9 @@
 
         document.getElementById("loader").style.display = "none";
         document.getElementById("title").textContent = "Invitation prête";
-        document.getElementById("text").textContent =
-          "Votre invitation est prête. Touchez le bouton ci-dessous pour rejoindre BSP.";
+        document.getElementById("text").textContent = plugId
+          ? "Touchez le bouton ci-dessous pour accéder au profil de vote."
+          : "Votre invitation est prête. Touchez le bouton ci-dessous pour rejoindre BSP.";
         document.getElementById("joinBtn").style.display = "block";
       }, 1800);
     }
