@@ -777,12 +777,11 @@ if (accessBot) {
       miniAppUrl = `https://booskabot.vercel.app/access.html?plug=${plugId}`;
     }
 
-    await ctx.replyWithPhoto(
-      { source: "./logo.png" },
-      {
-        caption: `🔌 Bienvenue sur BSP
+    await ctx.reply(
+      `🔌 Accès BSP prêt.
 
-Clique sur le bouton ci-dessous pour préparer ton accès.`,
+Clique sur le bouton ci-dessous pour continuer.`,
+      {
         reply_markup: {
           inline_keyboard: [
             [
