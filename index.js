@@ -663,7 +663,7 @@ Choisis ce que tu veux modifier :`, {
 if (accessBot) {
   accessBot.start(async (ctx) => {
     await ctx.replyWithPhoto(
-      { source: "./logo2.png" },
+      { source: "./logo.png" },
       {
         caption: `🔌 Bienvenue sur BSP
 
