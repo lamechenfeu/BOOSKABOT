@@ -7,6 +7,7 @@ const fs = require("fs");
 
 const BOT_URL = "https://booskabot.vercel.app";
 const ACCESS_URL = `${BOT_URL}/access.html`;
+const START_URL = `${BOT_URL}/start.html`;
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -150,9 +151,7 @@ function plugProfileKeyboard(plug) {
   buttons.push([{ text: "⬅️ Retour aux votes", callback_data: "votes" }]);
 
   return { inline_keyboard: buttons };
-}
-
-//////////////////////////////
+}//////////////////////////////
 // 🚀 START BOT PRINCIPAL
 //////////////////////////////
 
@@ -482,9 +481,164 @@ bot.action("admin_list_plugs", async (ctx) => {
   } catch (e) {}
 
   await ctx.reply(`📋 Liste des plugs :\n\n${list}`);
+});//////////////////////////////
+// 🛠️ ADMIN
+//////////////////////////////
+
+const ADMIN_IDS = (process.env.ADMIN_IDS || "6832036781")
+  .split(",")
+  .map(id => id.trim())
+  .filter(Boolean);
+
+const adminSessions = {};
+
+function isAdmin(ctx) {
+  return ctx.from && ADMIN_IDS.includes(String(ctx.from.id));
+}
+
+function adminPanelKeyboard() {
+  return {
+    inline_keyboard: [
+      [{ text: "➕ Ajouter un plug", callback_data: "admin_add_plug" }],
+      [{ text: "✏️ Modifier un plug", callback_data: "admin_edit_plug" }],
+      [{ text: "📋 Liste des plugs", callback_data: "admin_list_plugs" }],
+      [{ text: "🗑️ Supprimer un plug", callback_data: "admin_delete_plug" }]
+    ]
+  };
+}
+
+function startAddPlugSession(userId) {
+  adminSessions[userId] = {
+    mode: "add",
+    step: "name",
+    plug: {}
+  };
+}
+
+function startEditPlugSession(userId) {
+  adminSessions[userId] = {
+    mode: "edit_select_id",
+    step: "edit_id"
+  };
+}
+
+bot.command("admin", async (ctx) => {
+  saveUser(ctx);
+
+  if (!isAdmin(ctx)) {
+    return ctx.reply(`❌ Accès refusé.\nTon ID Telegram : ${ctx.from.id}`);
+  }
+
+  await ctx.reply("🛠️ Panel Admin BOOSKABOT", {
+    reply_markup: adminPanelKeyboard()
+  });
 });
 
-bot.action("admin_add_plug", async (ctx) => {
+//////////////////////////////
+// 💾 BACKUP ADMIN
+//////////////////////////////
+
+bot.command("backup", async (ctx) => {
+  saveUser(ctx);
+
+  if (!isAdmin(ctx)) {
+    return ctx.reply("❌ Accès refusé.");
+  }
+
+  try {
+    const dataFile = "/data/data.json";
+
+    if (!fs.existsSync(dataFile)) {
+      return ctx.reply("❌ Le fichier /data/data.json est introuvable.");
+    }
+
+    db.makeBackup("manual");
+
+    await ctx.replyWithDocument({
+      source: fs.createReadStream(dataFile),
+      filename: `BSP-backup-${Date.now()}.json`
+    });
+
+    await ctx.reply("✅ Sauvegarde envoyée avec succès.");
+  } catch (err) {
+    console.error("Erreur /backup :", err);
+    await ctx.reply(`❌ Erreur backup : ${err.message}`);
+  }
+});
+
+//////////////////////////////
+// 👥 USERS ADMIN
+//////////////////////////////
+
+bot.command("users", async (ctx) => {
+  saveUser(ctx);
+
+  if (!isAdmin(ctx)) {
+    return ctx.reply("❌ Accès refusé.");
+  }
+
+  const data = db.readData();
+  const users = data.users || [];
+
+  if (!users.length) {
+    return ctx.reply("👥 Aucun utilisateur enregistré pour le moment.");
+  }
+
+  const list = users.map((u, i) => {
+    return `${i + 1}. ${u.first_name || "-"} ${u.last_name || ""}
+@${u.username || "sans_username"}
+🆔 ${u.id}
+🕒 Dernière activité : ${u.last_seen_at || "-"}`;
+  }).join("\n\n");
+
+  const message = `👥 Utilisateurs enregistrés : ${users.length}\n\n${list}`;
+
+  if (message.length > 3500) {
+    const dataFile = "/data/data.json";
+
+    return ctx.replyWithDocument({
+      source: fs.createReadStream(dataFile),
+      filename: `BSP-users-${Date.now()}.json`
+    });
+  }
+
+  await ctx.reply(message);
+});
+
+bot.action("admin_list_plugs", async (ctx) => {
+  saveUser(ctx);
+
+  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+
+  const plugs = db.getPlugs();
+
+  if (!plugs.length) {
+    try {
+      await ctx.answerCbQuery();
+    } catch (e) {}
+    return ctx.reply("📋 Aucun plug enregistré pour le moment.");
+  }
+
+  const list = plugs.map((p, i) => {
+    return `${i + 1}. ${p.name}
+📍 Ville : ${p.city || "-"}
+📌 Secteur : ${p.sector || "-"}
+📝 Description : ${p.description || "-"}
+🔗 Telegram : ${p.telegram || p.link || "-"}
+📸 Instagram : ${p.instagram || "-"}
+🥔 Potato : ${p.potato || "-"}
+🟣 Luffa : ${p.luffa || "-"}
+🗳️ Votes : ${p.votes || 0}
+🖼️ ${p.image ? "Image enregistrée" : "Aucune image"}
+🆔 ${p.id}`;
+  }).join("\n\n");
+
+  try {
+    await ctx.answerCbQuery();
+  } catch (e) {}
+
+  await ctx.reply(`📋 Liste des plugs :\n\n${list}`);
+});bot.action("admin_add_plug", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
@@ -502,7 +656,9 @@ bot.action("admin_add_plug", async (ctx) => {
 
 Pour annuler : /cancel`
   );
-});bot.action("admin_edit_plug", async (ctx) => {
+});
+
+bot.action("admin_edit_plug", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
@@ -623,9 +779,7 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
   }
 
   return ctx.reply(`✏️ Envoie la nouvelle valeur pour : ${labels[field] || field}`);
-});
-
-bot.on("text", async (ctx) => {
+});bot.on("text", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -667,7 +821,9 @@ bot.on("text", async (ctx) => {
       session.plug.link = text;
       session.step = "instagram";
       return ctx.reply("Étape 6/8 : envoie le lien INSTAGRAM, ou écris `non`.");
-    }    if (session.step === "instagram") {
+    }
+
+    if (session.step === "instagram") {
       session.plug.instagram = text.toLowerCase() === "non" ? "" : text;
       session.step = "potato";
       return ctx.reply("Étape 7/8 : envoie le lien POTATO, ou écris `non`.");
@@ -799,11 +955,11 @@ if (accessBot) {
   accessBot.start(async (ctx) => {
     const payload = ctx.startPayload || "";
 
-    let miniAppUrl = ACCESS_URL;
+    let miniAppUrl = `${BOT_URL}/start.html?v=3`;
 
     if (payload.startsWith("plug_")) {
       const plugId = payload.replace("plug_", "");
-      miniAppUrl = `${ACCESS_URL}?plug=${plugId}`;
+      miniAppUrl = `${BOT_URL}/start.html?plug=${plugId}&v=3`;
     }
 
     await ctx.reply(
