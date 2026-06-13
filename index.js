@@ -662,21 +662,20 @@ Choisis ce que tu veux modifier :`, {
 
 if (accessBot) {
   accessBot.start(async (ctx) => {
-    if (!MAIN_BOT_USERNAME) {
-      return ctx.reply("❌ Bot principal non configuré.");
-    }
-
-    await ctx.reply(
-`🔌 Bienvenue sur BSP
-
-Clique sur le bouton ci-dessous pour accéder à la plateforme officielle.`,
+    await ctx.replyWithPhoto(
+      { source: "./logo.png" },
       {
+        caption: `🔌 Bienvenue sur BSP
+
+Clique sur le bouton ci-dessous pour préparer ton accès.`,
         reply_markup: {
           inline_keyboard: [
             [
               {
                 text: "🚀 Accéder à BSP",
-                url: "https://booskabot.vercel.app/access.html"
+                web_app: {
+                  url: "https://booskabot.vercel.app/access.html"
+                }
               }
             ]
           ]
