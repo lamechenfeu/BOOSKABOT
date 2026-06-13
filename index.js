@@ -674,7 +674,7 @@ Clique sur le bouton ci-dessous pour préparer ton accès.`,
               {
                 text: "🚀 Accéder à BSP",
                 web_app: {
-                  url: "https://booskabot.vercel.app/access.html"
+                  url: "https://booskabot.vercel.app/miniapp/access.html"
                 }
               }
             ]
