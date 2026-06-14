@@ -98,7 +98,6 @@ function deletePlug(id) {
   return after < before;
 }
 
-
 function votePlug(userId, plugId) {
   const data = readData();
 
