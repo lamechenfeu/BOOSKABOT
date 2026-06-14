@@ -439,7 +439,7 @@ bot.command("users", async (ctx) => {
 });
 
 bot.action("admin_list_plugs", async (ctx) => {
-  saveUser(ctx);
+  setTimeout(() => saveUser(ctx), 0);
 
   if (!isAdmin(ctx)) return safeAnswer(ctx, "❌ Accès refusé");
 
@@ -803,7 +803,9 @@ Clique sur le bouton ci-dessous pour continuer.`,
       }
     );
   });
-}//////////////////////////////
+}
+
+//////////////////////////////
 // 🌍 SERVEUR HTTP POUR RENDER + API
 //////////////////////////////
 
