@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Canal BSP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0b0d16;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -40px;
+      background:
+        linear-gradient(rgba(5,7,13,.82), rgba(5,7,13,.94)),
+        url("bsp.png") center/cover no-repeat;
+      filter: blur(16px);
+      transform: scale(1.08);
+      opacity: .55;
+      z-index: -2;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 420px;
+      padding: 28px;
+      animation: fadeUp .55s ease;
+    }
+
+    .logo {
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 24px;
+      border-radius: 28px;
+      background: url("bsp.png") center/cover no-repeat;
+      box-shadow: 0 0 45px rgba(180, 0, 255, .75);
+      animation: pulse 1.25s infinite ease-in-out;
+    }
+
+    .loader {
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      border: 5px solid rgba(255,255,255,.12);
+      border-top-color: #28c7ff;
+      animation: spin 1s linear infinite;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 900;
+      text-shadow: 0 0 18px rgba(180,0,255,.9);
+    }
+
+    p {
+      margin: 12px auto 0;
+      max-width: 310px;
+      color: #a9b6c8;
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .join {
+      display: none;
+      margin-top: 26px;
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 15px 18px;
+      color: white;
+      font-size: 15px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #008cff, #00d9ff);
+      box-shadow: 0 0 28px rgba(0,217,255,.35);
+    }
+
+    .small {
+      margin-top: 18px;
+      font-size: 11px;
+      color: rgba(180,190,205,.55);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: .86; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="box">
+    <div class="logo"></div>
+    <div id="loader" class="loader"></div>
+
+    <h1 id="title">Préparation...</h1>
+    <p id="text">Préparation de votre accès au canal privé...</p>
+
+    <button id="joinBtn" class="join" onclick="openChannel()">
+      Rejoindre le canal
+    </button>
+
+    <div class="small">Canal officiel BSP</div>
+  </main>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    const channelLink = "https://t.me/+aIfKkK6E6XplYmM8";
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      tg.setHeaderColor("#05070d");
+      tg.setBackgroundColor("#05070d");
+    }
+
+    function openChannel() {
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(channelLink);
+      } else {
+        window.location.href = channelLink;
+      }
+    }
+
+    setTimeout(() => {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("title").textContent = "Accès prêt";
+      document.getElementById("text").textContent =
+        "Touchez le bouton ci-dessous pour rejoindre le canal privé.";
+      document.getElementById("joinBtn").style.display = "block";
+    }, 1600);
+  </script>
+</body>
+</html>
