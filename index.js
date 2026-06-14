@@ -545,11 +545,17 @@ bot.command("delplug", async (ctx) => {
 
   const id = ctx.message.text.replace("/delplug", "").trim();
 
-  if (!id) return ctx.reply("❌ Mets l'ID du plug.");
+  if (!id) return ctx.reply("❌ Mets l'ID du plug. Exemple : /delplug 123456");
 
-  db.deletePlug(id);
+  const before = db.getPlugs().length;
+  const deleted = db.deletePlug(id);
+  const after = db.getPlugs().length;
 
-  await ctx.reply(`🗑️ Plug supprimé : ${id}`);
+  if (!deleted || before === after) {
+    return ctx.reply(`❌ Aucun plug trouvé avec cet ID : ${id}`);
+  }
+
+  await ctx.reply(`✅ Plug supprimé définitivement : ${id}`);
 });
 
 bot.command("cancel", async (ctx) => {

@@ -86,12 +86,18 @@ function updatePlug(id, updates) {
 function deletePlug(id) {
   const data = readData();
 
-  data.plugs = data.plugs.filter(p => String(p.id) !== String(id));
-  data.votes = data.votes.filter(v => String(v.plugId) !== String(id));
+  const before = data.plugs.length;
+
+  data.plugs = data.plugs.filter(p => String(p.id).trim() !== String(id).trim());
+  data.votes = data.votes.filter(v => String(v.plugId).trim() !== String(id).trim());
+
+  const after = data.plugs.length;
 
   writeData(data);
-  return true;
+
+  return after < before;
 }
+
 
 function votePlug(userId, plugId) {
   const data = readData();
