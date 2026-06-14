@@ -5,7 +5,7 @@ const db = require('./database');
 const http = require("http");
 const fs = require("fs");
 
-const BOT_URL = "https://booskabot.vercel.app";
+const BOT_URL = "https://booskabot.vercel.app/index.html";;
 const CANAL_URL = "https://booskabot.vercel.app/canal.html";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
