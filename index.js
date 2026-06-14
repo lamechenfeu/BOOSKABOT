@@ -6,12 +6,7 @@ const http = require("http");
 const fs = require("fs");
 
 const BOT_URL = "https://booskabot.vercel.app";
-
-// PASSERELLE BSP = index.html
-const ACCESS_URL = `${BOT_URL}/index.html`;
-
-// BOUTON TELEGRAM = start.html
-const START_URL = `${BOT_URL}/start.html`;
+const CANAL_URL = "https://booskabot.vercel.app/canal.html";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -58,6 +53,12 @@ function saveUser(ctx) {
   } catch (err) {
     console.error("Erreur sauvegarde utilisateur :", err.message);
   }
+}
+
+async function safeAnswer(ctx, text) {
+  try {
+    await ctx.answerCbQuery(text);
+  } catch (e) {}
 }
 
 //////////////////////////////
@@ -109,7 +110,7 @@ function mainMenuKeyboard() {
       [{
         text: "🔐 TELEGRAM",
         web_app: {
-          url: START_URL
+          url: CANAL_URL
         }
       }],
       [{ text: "🌐 NOS RÉSEAUX", callback_data: "reseaux" }]
@@ -125,19 +126,12 @@ function plugProfileKeyboard(plug) {
   buttons.push([
     {
       text: "🔗 Lien pour voter",
-      url: `https://t.me/${MAIN_BOT_USERNAME}?start=plug_${plug.id}`
+      url: `https://t.me/BSPStartBot?start=plug_${plug.id}`
     }
   ]);
 
   if (isValidUrl(plug.telegram || plug.link)) {
-    buttons.push([
-      {
-        text: "🔐 TELEGRAM",
-        web_app: {
-          url: `${START_URL}?plug=${plug.id}`
-        }
-      }
-    ]);
+    buttons.push([{ text: "🔗 Telegram", url: plug.telegram || plug.link }]);
   }
 
   if (isValidUrl(plug.instagram)) {
@@ -155,7 +149,9 @@ function plugProfileKeyboard(plug) {
   buttons.push([{ text: "⬅️ Retour aux votes", callback_data: "votes" }]);
 
   return { inline_keyboard: buttons };
-}//////////////////////////////
+}
+
+//////////////////////////////
 // 🚀 START BOT PRINCIPAL
 //////////////////////////////
 
@@ -194,9 +190,7 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 
 bot.action("votes", async (ctx) => {
   saveUser(ctx);
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   const plugs = db.getPlugs();
 
@@ -234,13 +228,9 @@ Choisis un 🔌 pour voir son profil ou voter :`,
       }
     }
   );
-});
-
-bot.action(/^plug_profile_(.+)$/, async (ctx) => {
+});bot.action(/^plug_profile_(.+)$/, async (ctx) => {
   saveUser(ctx);
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   const plugId = ctx.match[1];
   const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
@@ -266,14 +256,14 @@ bot.action(/^vote_plug_(.+)$/, async (ctx) => {
   const result = db.votePlug(userId, plugId);
 
   if (!result.ok && result.reason === "already_voted") {
-    return ctx.answerCbQuery("❌ Tu as déjà voté pour ce plug !");
+    return safeAnswer(ctx, "❌ Tu as déjà voté pour ce plug !");
   }
 
   if (!result.ok) {
-    return ctx.answerCbQuery("❌ Plug introuvable.");
+    return safeAnswer(ctx, "❌ Plug introuvable.");
   }
 
-  await ctx.answerCbQuery("✅ Vote enregistré !");
+  await safeAnswer(ctx, "✅ Vote enregistré !");
 
   const plug = db.getPlugs().find(p => String(p.id) === String(plugId));
 
@@ -291,9 +281,7 @@ bot.action(/^vote_plug_(.+)$/, async (ctx) => {
 
 bot.action("reseaux", async (ctx) => {
   saveUser(ctx);
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   await ctx.editMessageCaption(
 `🌐 NOS RÉSEAUX
@@ -317,9 +305,7 @@ Choisissez une plateforme :`,
 
 bot.action("retour_menu", async (ctx) => {
   saveUser(ctx);
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   await ctx.editMessageCaption(
 `👋 Bienvenue sur BOOSKABOT
@@ -328,7 +314,9 @@ Cliquez sur les boutons du dessous pour naviguer !`,
 {
     reply_markup: mainMenuKeyboard()
   });
-});//////////////////////////////
+});
+
+//////////////////////////////
 // 🛠️ ADMIN
 //////////////////////////////
 
@@ -367,9 +355,7 @@ function startEditPlugSession(userId) {
     mode: "edit_select_id",
     step: "edit_id"
   };
-}
-
-bot.command("admin", async (ctx) => {
+}bot.command("admin", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) {
@@ -455,14 +441,12 @@ bot.command("users", async (ctx) => {
 bot.action("admin_list_plugs", async (ctx) => {
   saveUser(ctx);
 
-  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+  if (!isAdmin(ctx)) return safeAnswer(ctx, "❌ Accès refusé");
 
   const plugs = db.getPlugs();
 
   if (!plugs.length) {
-    try {
-      await ctx.answerCbQuery();
-    } catch (e) {}
+    await safeAnswer(ctx);
     return ctx.reply("📋 Aucun plug enregistré pour le moment.");
   }
 
@@ -480,19 +464,14 @@ bot.action("admin_list_plugs", async (ctx) => {
 🆔 ${p.id}`;
   }).join("\n\n");
 
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
-
+  await safeAnswer(ctx);
   await ctx.reply(`📋 Liste des plugs :\n\n${list}`);
 });bot.action("admin_add_plug", async (ctx) => {
   saveUser(ctx);
 
-  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+  if (!isAdmin(ctx)) return safeAnswer(ctx, "❌ Accès refusé");
 
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   startAddPlugSession(ctx.from.id);
 
@@ -508,11 +487,9 @@ Pour annuler : /cancel`
 bot.action("admin_edit_plug", async (ctx) => {
   saveUser(ctx);
 
-  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+  if (!isAdmin(ctx)) return safeAnswer(ctx, "❌ Accès refusé");
 
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   const plugs = db.getPlugs();
 
@@ -538,11 +515,9 @@ Envoie l'ID du plug.`
 bot.action("admin_delete_plug", async (ctx) => {
   saveUser(ctx);
 
-  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+  if (!isAdmin(ctx)) return safeAnswer(ctx, "❌ Accès refusé");
 
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   const plugs = db.getPlugs();
 
@@ -584,30 +559,23 @@ bot.command("cancel", async (ctx) => {
 
   delete adminSessions[ctx.from.id];
   await ctx.reply("❌ Action annulée.");
-});
-
-bot.action(/^edit_field_(.+)$/, async (ctx) => {
+});bot.action(/^edit_field_(.+)$/, async (ctx) => {
   saveUser(ctx);
 
-  if (!isAdmin(ctx)) return ctx.answerCbQuery("❌ Accès refusé");
+  if (!isAdmin(ctx)) return safeAnswer(ctx, "❌ Accès refusé");
 
   const field = ctx.match[1];
   const session = adminSessions[ctx.from.id];
 
   if (!session || session.mode !== "edit") {
-    try {
-      await ctx.answerCbQuery();
-    } catch (e) {}
-
+    await safeAnswer(ctx);
     return ctx.reply("❌ Aucune modification en cours. Retourne dans /admin.");
   }
 
   session.field = field;
   session.step = field === "image" ? "edit_photo" : "edit_value";
 
-  try {
-    await ctx.answerCbQuery();
-  } catch (e) {}
+  await safeAnswer(ctx);
 
   const labels = {
     name: "nom",
@@ -626,7 +594,9 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
   }
 
   return ctx.reply(`✏️ Envoie la nouvelle valeur pour : ${labels[field] || field}`);
-});bot.on("text", async (ctx) => {
+});
+
+bot.on("text", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -674,9 +644,7 @@ bot.action(/^edit_field_(.+)$/, async (ctx) => {
       session.plug.instagram = text.toLowerCase() === "non" ? "" : text;
       session.step = "potato";
       return ctx.reply("Étape 7/8 : envoie le lien POTATO, ou écris `non`.");
-    }
-
-    if (session.step === "potato") {
+    }    if (session.step === "potato") {
       session.plug.potato = text.toLowerCase() === "non" ? "" : text;
       session.step = "luffa";
       return ctx.reply("Étape 8/8 : envoie le lien LUFFA, ou écris `non`.");
@@ -737,9 +705,7 @@ Choisis ce que tu veux modifier :`, {
 
     return ctx.reply(`✅ Plug modifié avec succès : ${plug.name}`);
   }
-});
-
-bot.on("photo", async (ctx) => {
+});bot.on("photo", async (ctx) => {
   saveUser(ctx);
 
   if (!isAdmin(ctx)) return;
@@ -794,7 +760,9 @@ bot.on("photo", async (ctx) => {
 
     return ctx.reply(`✅ Photo modifiée pour : ${plug.name}`);
   }
-});//////////////////////////////
+});
+
+//////////////////////////////
 // 🚪 BOT PASSERELLE PUBLIC
 //////////////////////////////
 
@@ -802,11 +770,11 @@ if (accessBot) {
   accessBot.start(async (ctx) => {
     const payload = ctx.startPayload || "";
 
-    let miniAppUrl = ACCESS_URL;
+    let miniAppUrl = "https://booskabot.vercel.app/access.html";
 
     if (payload.startsWith("plug_")) {
       const plugId = payload.replace("plug_", "");
-      miniAppUrl = `${ACCESS_URL}?plug=${plugId}`;
+      miniAppUrl = `https://booskabot.vercel.app/access.html?plug=${plugId}`;
     }
 
     await ctx.reply(
@@ -829,9 +797,7 @@ Clique sur le bouton ci-dessous pour continuer.`,
       }
     );
   });
-}
-
-//////////////////////////////
+}//////////////////////////////
 // 🌍 SERVEUR HTTP POUR RENDER + API
 //////////////////////////////
 
@@ -859,9 +825,7 @@ http.createServer((req, res) => {
     const exists = users.some(u => String(u.id) === String(id));
 
     res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify({
-      exists
-    }));
+    return res.end(JSON.stringify({ exists }));
   }
 
   res.writeHead(200, { "Content-Type": "text/plain" });
