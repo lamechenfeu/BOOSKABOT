@@ -58,24 +58,140 @@
     }
 
     .loading {
-      position: fixed;
-      inset: 0;
-      background: #05070d;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 999;
-    }
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(180,0,255,.22), transparent 28%),
+    linear-gradient(to bottom, #05070d, #02030a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 999;
+}
 
-    .loader-logo {
-      width: 92px;
-      height: 92px;
-      border-radius: 26px;
-      background: url("bsp.png") center/cover no-repeat;
-      box-shadow: 0 0 45px rgba(190, 0, 255, .75);
-      animation: pulse 1.2s infinite ease-in-out;
-    }
+.loader-orbit {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  display: grid;
+  place-items: center;
+}
+
+.loader-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.08);
+  border-top-color: #d000ff;
+  border-right-color: #00d9ff;
+  box-shadow:
+    0 0 24px rgba(180,0,255,.55),
+    inset 0 0 22px rgba(0,217,255,.12);
+  animation: spin 1.15s linear infinite;
+}
+
+.loader-ring::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0,217,255,.35);
+  animation: spinReverse 2.4s linear infinite;
+}
+
+.loader-logo {
+  width: 86px;
+  height: 86px;
+  border-radius: 26px;
+  background: url("bsp.png") center/cover no-repeat;
+  box-shadow:
+    0 0 28px rgba(190,0,255,.9),
+    0 0 70px rgba(0,217,255,.24);
+  animation: logoPulse 1.35s infinite ease-in-out;
+  z-index: 2;
+}
+
+.loader-title {
+  margin-top: 16px;
+  font-size: 42px;
+  font-weight: 900;
+  color: transparent;
+  background: linear-gradient(90deg, #8b00ff, #ff4dff, #ffffff, #00d9ff);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 0 28px rgba(180,0,255,.7);
+  animation: neonTextMove 2.2s linear infinite;
+}
+
+.loader-text {
+  margin: 8px 0 18px;
+  color: #cfeaff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .3px;
+}
+
+.loader-bar {
+  width: 190px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  overflow: hidden;
+  box-shadow: 0 0 18px rgba(180,0,255,.25);
+}
+
+.loader-bar span {
+  display: block;
+  width: 45%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b400ff, #00d9ff, #ffffff);
+  animation: loadingBar 1.2s ease-in-out infinite;
+}
+
+.spark {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00d9ff;
+  box-shadow: 0 0 16px #00d9ff;
+}
+
+.s1 { top: 12px; right: 28px; animation: sparkMove 1.7s infinite ease-in-out; }
+.s2 { bottom: 20px; left: 22px; animation: sparkMove 2.1s infinite ease-in-out reverse; }
+.s3 { top: 66px; left: 6px; background: #ff4dff; box-shadow: 0 0 16px #ff4dff; animation: sparkMove 1.9s infinite ease-in-out; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.25);
+  }
+}
+
+@keyframes loadingBar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(240%); }
+}
+
+@keyframes sparkMove {
+  0%, 100% { transform: scale(1) translateY(0); opacity: .55; }
+  50% { transform: scale(1.8) translateY(-8px); opacity: 1; }
+}
 
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
@@ -305,9 +421,21 @@
 
 <body>
   <div class="loading" id="loading">
+  <div class="loader-orbit">
+    <div class="loader-ring"></div>
     <div class="loader-logo"></div>
-    <p>Chargement de BSP...</p>
+    <span class="spark s1"></span>
+    <span class="spark s2"></span>
+    <span class="spark s3"></span>
   </div>
+
+  <div class="loader-title">BSP</div>
+  <p class="loader-text">Connexion à la plateforme...</p>
+
+  <div class="loader-bar">
+    <span></span>
+  </div>
+</div>
 
   <main class="app" id="app">
     <section class="hero">
