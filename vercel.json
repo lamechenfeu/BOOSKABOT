@@ -2,7 +2,19 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/access.html",
+      "destination": "/miniapp/access.html"
+    },
+    {
+      "source": "/canal.html",
+      "destination": "/miniapp/canal.html"
+    },
+    {
+      "source": "/",
+      "destination": "/miniapp/index.html"
+    },
+    {
+      "source": "/index.html",
       "destination": "/miniapp/index.html"
     }
   ]
