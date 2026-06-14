@@ -6,7 +6,7 @@ const http = require("http");
 const fs = require("fs");
 
 const BOT_URL = "https://booskabot.vercel.app";
-const CANAL_URL = "https://booskabot.vercel.app/canal.html";
+const CANAL_URL = "https://booskabot.vercel.app/miniapp/canal.html";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -770,11 +770,11 @@ if (accessBot) {
   accessBot.start(async (ctx) => {
     const payload = ctx.startPayload || "";
 
-    let miniAppUrl = "https://booskabot.vercel.app/access.html";
+    let miniAppUrl = "https://booskabot.vercel.app/miniapp/access.html";
 
     if (payload.startsWith("plug_")) {
       const plugId = payload.replace("plug_", "");
-      miniAppUrl = `https://booskabot.vercel.app/access.html?plug=${plugId}`;
+      miniAppUrl = `https://booskabot.vercel.app/miniapp/access.html?plug=${plugId}`;
     }
 
     await ctx.reply(
